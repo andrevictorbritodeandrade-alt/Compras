@@ -4,14 +4,16 @@ import { MonthTabs } from './components/MonthTabs';
 import { SummaryBar } from './components/SummaryBar';
 import { AddItemForm } from './components/AddItemForm';
 import { Encartes } from './components/Encartes';
+import { PreShoppingList } from './components/PreShoppingList';
+import { MonthlyHistory } from './components/MonthlyHistory';
 import { INITIAL_CATEGORIES } from './constants';
-import type { Category, ShoppingItem, Estimation, Deal } from './types';
+import type { Category, ShoppingItem, Estimation, Deal, MonthlyHistory as MonthlyHistoryType } from './types';
 import { db } from './firebase/config';
 import { doc, onSnapshot, setDoc, updateDoc, collection, getDocs, writeBatch } from 'firebase/firestore';
 import { Logo } from './components/Logo';
 import { GoogleGenAI } from '@google/genai';
 import { AIAssistant } from './components/AIAssistant';
-import { ShoppingCart, Tag } from 'lucide-react';
+import { ShoppingCart, Tag, ListTodo, History } from 'lucide-react';
 import { INITIAL_DEALS } from './data/initialDeals';
 
 // Define a type for the BeforeInstallPromptEvent
@@ -26,6 +28,17 @@ interface BeforeInstallPromptEvent extends Event {
 
 const App: React.FC = () => {
   const [activeMonth, setActiveMonth] = useState<string>('November');
+  const [currentShoppingList, setCurrentShoppingList] = useState<Category[]>([]);
+  const [deals, setDeals] = useState<Deal[]>([]);
+  const [history, setHistory] = useState<MonthlyHistoryType[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [installPromptEvent, setInstallPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isAddItemFormVisible, setIsAddItemFormVisible] = useState(false);
+  const [activeTab, setActiveTab] = useState<'list' | 'pre-list' | 'encartes' | 'history'>('list');
+
+  const [isAIAssistantOpen, setIsAIAssistantOpen] = useState(false);
+  const [estimations, setEstimations] = useState<Map<string, { quantity: number; unit: string }>>(new Map());
+  const [isEstimating, setIsEstimating] = useState(false);
 
   // Seed initial deals
   useEffect(() => {
@@ -40,10 +53,6 @@ const App: React.FC = () => {
           
           INITIAL_DEALS.forEach(deal => {
             const docRef = doc(dealsRef);
-            // Remove the id from the deal object as Firestore generates a new one, 
-            // or use the provided id as the doc id. Let's use the provided ID for consistency if possible,
-            // but the Deal type has an ID.
-            // Let's just add them.
             const { id, ...dealData } = deal;
             batch.set(docRef, dealData);
           });
@@ -58,26 +67,32 @@ const App: React.FC = () => {
     
     seedDeals();
   }, []);
-  const [currentShoppingList, setCurrentShoppingList] = useState<Category[]>([]);
-  const [deals, setDeals] = useState<Deal[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [installPromptEvent, setInstallPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isAddItemFormVisible, setIsAddItemFormVisible] = useState(false);
-  const [activeTab, setActiveTab] = useState<'list' | 'encartes'>('list');
 
-  const [isAIAssistantOpen, setIsAIAssistantOpen] = useState(false);
-  const [estimations, setEstimations] = useState<Map<string, { quantity: number; unit: string }>>(new Map());
-  const [isEstimating, setIsEstimating] = useState(false);
-  
+  // Fetch history for all months
   useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
-          .then(registration => console.log('Service Worker registered: ', registration))
-          .catch(registrationError => console.log('Service Worker registration failed: ', registrationError));
-      });
-    }
+    const fetchHistory = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'shoppingLists'));
+        const historyData: MonthlyHistoryType[] = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          const categories = (data.categories as Category[]) || [];
+          const total = categories.reduce((acc, cat) => {
+            return acc + cat.items.reduce((catTotal, item) => catTotal + (item.quantity * item.price), 0);
+          }, 0);
+          if (total > 0) {
+            historyData.push({ month: doc.id, total });
+          }
+        });
+        setHistory(historyData);
+      } catch (error) {
+        console.error('Error fetching history:', error);
+      }
+    };
+    fetchHistory();
+  }, [currentShoppingList]);
 
+  useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setInstallPromptEvent(e as BeforeInstallPromptEvent);
@@ -106,6 +121,21 @@ const App: React.FC = () => {
     }
   };
 
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
   useEffect(() => {
     setIsLoading(true);
     const docRef = doc(db, 'shoppingLists', activeMonth);
@@ -116,7 +146,6 @@ const App: React.FC = () => {
         const categoriesFromDb = data.categories as Category[];
         const dealsFromDb = (data.deals as Deal[]) || [];
         
-        // Sort items within each category for consistent display
         const sortedCategories = categoriesFromDb.map(category => ({
           ...category,
           items: [...category.items].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
@@ -142,7 +171,7 @@ const App: React.FC = () => {
     setActiveMonth(month);
   }, []);
   
-  const handleItemChange = useCallback(async (itemId: number, field: keyof ShoppingItem, value: string | number) => {
+  const handleItemChange = useCallback(async (itemId: number, field: keyof ShoppingItem, value: string | number | boolean) => {
     const docRef = doc(db, 'shoppingLists', activeMonth);
     const newCategories = JSON.parse(JSON.stringify(currentShoppingList));
     
@@ -185,11 +214,12 @@ const App: React.FC = () => {
     const itemToAdd: ShoppingItem = {
       ...newItem,
       id: Date.now(),
+      active: true,
+      checked: false
     };
 
     if (categoryIndex > -1) {
       newCategories[categoryIndex].items.push(itemToAdd);
-      // Re-sort the items list to maintain alphabetical order
       newCategories[categoryIndex].items.sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
     } else {
       newCategories.push({
@@ -200,7 +230,42 @@ const App: React.FC = () => {
     }
 
     await updateDoc(docRef, { categories: newCategories });
-    setIsAddItemFormVisible(false); // Close form after adding
+    setIsAddItemFormVisible(false);
+  }, [activeMonth, currentShoppingList]);
+
+  const handleAddItemsFromPreShopping = useCallback(async (itemsToAdd: { name: string; category: string }[]) => {
+    const docRef = doc(db, 'shoppingLists', activeMonth);
+    const newCategories = JSON.parse(JSON.stringify(currentShoppingList));
+
+    itemsToAdd.forEach((itemToAdd, index) => {
+      let category = newCategories.find((cat: Category) => cat.name.toLowerCase() === itemToAdd.category.toLowerCase());
+
+      if (!category) {
+        category = {
+          id: Date.now() + index,
+          name: itemToAdd.category,
+          items: []
+        };
+        newCategories.push(category);
+      }
+
+      const itemExists = category.items.some((i: ShoppingItem) => i.name.toLowerCase() === itemToAdd.name.toLowerCase());
+
+      if (!itemExists) {
+        category.items.push({
+          id: Date.now() + 1000 + index,
+          name: itemToAdd.name,
+          quantity: 1,
+          price: 0,
+          active: true,
+          checked: false
+        });
+        category.items.sort((a: ShoppingItem, b: ShoppingItem) => a.name.localeCompare(b.name, 'pt-BR'));
+      }
+    });
+
+    await updateDoc(docRef, { categories: newCategories });
+    setActiveTab('list');
   }, [activeMonth, currentShoppingList]);
 
   const handleAddDeal = useCallback(async (newDeal: Omit<Deal, 'id'>) => {
@@ -337,6 +402,14 @@ const App: React.FC = () => {
   }, [activeMonth, currentShoppingList, itemToCategoryMap]);
 
 
+  const itemCount = useMemo(() => {
+    return currentShoppingList.reduce((acc, cat) => acc + cat.items.length, 0);
+  }, [currentShoppingList]);
+
+  const activeItemCount = useMemo(() => {
+    return currentShoppingList.reduce((acc, cat) => acc + cat.items.filter(i => i.active !== false).length, 0);
+  }, [currentShoppingList]);
+
   const totalCost = useMemo(() => {
     if (!currentShoppingList) return 0;
     return currentShoppingList.reduce((total, category) => {
@@ -356,7 +429,6 @@ const App: React.FC = () => {
     return currentShoppingList.flatMap(cat => cat.items.map(item => item.name));
   }, [currentShoppingList]);
 
-  // (100g bariatric + 200g other) * 2 meals/day * 31 days
   const meatEstimateKg = useMemo(() => (0.3 * 2 * 31), []);
 
   const bestDeals = useMemo(() => {
@@ -373,6 +445,11 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen font-sans bg-gradient-to-b from-violet-400 to-white">
+      {!isOnline && (
+        <div className="bg-amber-500 text-white text-center py-1 text-xs font-bold sticky top-0 z-[60]">
+          Modo Offline Ativo - Suas alterações serão sincronizadas quando houver internet
+        </div>
+      )}
       <header className="bg-transparent text-slate-800">
         <div className="container mx-auto px-4 pt-8 pb-4 flex flex-col items-center">
             <Logo className="h-16 w-16 mb-4" />
@@ -392,10 +469,11 @@ const App: React.FC = () => {
                   </button>
                 <button
                     onClick={() => setIsAIAssistantOpen(true)}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                    disabled={!isOnline}
+                    className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white ${!isOnline ? 'bg-slate-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500`}
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
-                    Estimar com IA
+                    {isOnline ? 'Estimar com IA' : 'IA Indisponível (Offline)'}
                 </button>
             </div>
         </div>
@@ -410,12 +488,20 @@ const App: React.FC = () => {
         isLoading={isEstimating}
         onAddItems={handleAddItemsFromAI}
       />
+
+      {activeTab === 'list' && (
+        <SummaryBar 
+          total={totalCost} 
+          itemCount={itemCount} 
+          activeItemCount={activeItemCount} 
+        />
+      )}
       
       <div className="container mx-auto px-4 mb-6">
-        <div className="flex justify-center space-x-4">
+        <div className="flex justify-center space-x-2 md:space-x-4 overflow-x-auto no-scrollbar py-2">
             <button
                 onClick={() => setActiveTab('list')}
-                className={`flex items-center px-6 py-3 rounded-full font-medium transition-all ${
+                className={`flex items-center px-4 md:px-6 py-3 rounded-full font-medium transition-all whitespace-nowrap ${
                     activeTab === 'list' 
                     ? 'bg-white text-violet-700 shadow-md' 
                     : 'bg-white/30 text-slate-700 hover:bg-white/50'
@@ -425,8 +511,19 @@ const App: React.FC = () => {
                 Lista de Compras
             </button>
             <button
+                onClick={() => setActiveTab('pre-list')}
+                className={`flex items-center px-4 md:px-6 py-3 rounded-full font-medium transition-all whitespace-nowrap ${
+                    activeTab === 'pre-list' 
+                    ? 'bg-white text-violet-700 shadow-md' 
+                    : 'bg-white/30 text-slate-700 hover:bg-white/50'
+                }`}
+            >
+                <ListTodo className="w-5 h-5 mr-2" />
+                Antes das Compras
+            </button>
+            <button
                 onClick={() => setActiveTab('encartes')}
-                className={`flex items-center px-6 py-3 rounded-full font-medium transition-all ${
+                className={`flex items-center px-4 md:px-6 py-3 rounded-full font-medium transition-all whitespace-nowrap ${
                     activeTab === 'encartes' 
                     ? 'bg-white text-violet-700 shadow-md' 
                     : 'bg-white/30 text-slate-700 hover:bg-white/50'
@@ -434,6 +531,17 @@ const App: React.FC = () => {
             >
                 <Tag className="w-5 h-5 mr-2" />
                 Encartes
+            </button>
+            <button
+                onClick={() => setActiveTab('history')}
+                className={`flex items-center px-4 md:px-6 py-3 rounded-full font-medium transition-all whitespace-nowrap ${
+                    activeTab === 'history' 
+                    ? 'bg-white text-violet-700 shadow-md' 
+                    : 'bg-white/30 text-slate-700 hover:bg-white/50'
+                }`}
+            >
+                <History className="w-5 h-5 mr-2" />
+                Histórico
             </button>
         </div>
       </div>
@@ -465,6 +573,13 @@ const App: React.FC = () => {
                         />
                     </>
                 )}
+                {activeTab === 'pre-list' && (
+                    <PreShoppingList 
+                      onAddItemsToList={handleAddItemsFromPreShopping}
+                      currentShoppingList={currentShoppingList}
+                      onItemChange={handleItemChange}
+                    />
+                )}
                 {activeTab === 'encartes' && (
                     <Encartes 
                         deals={deals} 
@@ -474,11 +589,12 @@ const App: React.FC = () => {
                         shoppingList={currentShoppingList}
                     />
                 )}
+                {activeTab === 'history' && (
+                    <MonthlyHistory history={history} />
+                )}
             </>
         )}
       </main>
-      
-      {activeTab === 'list' && <SummaryBar total={totalCost} />}
     </div>
   );
 };

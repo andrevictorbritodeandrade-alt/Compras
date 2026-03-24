@@ -56,19 +56,22 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ categories, onItemCh
   return (
     <div>
         {/* Desktop Header */}
-        <div className="hidden md:grid grid-cols-12 gap-2 px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 rounded-t-lg border-b">
-            <div className="col-span-4">Produto</div>
-            <div className="col-span-2 text-center">Qtd. Atual</div>
-            <div className="col-span-2 text-center">Qtd. Estimada</div>
+        <div className="hidden md:grid grid-cols-12 gap-2 px-4 py-3 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 rounded-t-lg border-b">
+            <div className="col-span-1 text-center">Status</div>
+            <div className="col-span-1 text-center">Check</div>
+            <div className="col-span-3">Produto</div>
+            <div className="col-span-1 text-center">Qtd.</div>
+            <div className="col-span-1 text-center">Estim.</div>
             <div className="col-span-2 text-center">Preço Unit.</div>
             <div className="col-span-1 text-center">Subtotal</div>
             <div className="col-span-1 text-right">Ações</div>
         </div>
         {/* Mobile Header */}
-        <div className="grid md:hidden grid-cols-12 gap-x-1 px-2 py-2 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 rounded-t-lg border-b">
+        <div className="grid md:hidden grid-cols-12 gap-x-1 px-2 py-2 text-center text-[10px] font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 rounded-t-lg border-b">
+            <div className="col-span-1">St.</div>
+            <div className="col-span-1">Ck.</div>
             <div className="col-span-3 text-left">Produto</div>
-            <div className="col-span-2">Qtd. Atual</div>
-            <div className="col-span-2">Qtd. Estimada</div>
+            <div className="col-span-1">Qtd</div>
             <div className="col-span-2">Preço</div>
             <div className="col-span-2">Subtotal</div>
             <div className="col-span-1"></div>

@@ -4,6 +4,8 @@ export interface ShoppingItem {
   quantity: number;
   price: number;
   unit?: string;
+  active?: boolean;
+  checked?: boolean;
 }
 
 export interface Category {
@@ -24,4 +26,16 @@ export interface Deal {
   price: number;
   market: string;
   date: string; // ISO date string YYYY-MM-DD
+}
+
+export interface PreShoppingItem {
+  id: string;
+  name: string;
+  category: string;
+  selected: boolean;
+}
+
+export interface MonthlyHistory {
+  month: string;
+  total: number;
 }
