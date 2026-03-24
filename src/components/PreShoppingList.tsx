@@ -77,6 +77,7 @@ export const PreShoppingList: React.FC<PreShoppingListProps> = ({ onAddItemsToLi
               <tr>
                 <th className="px-6 py-3">Item</th>
                 <th className="px-6 py-3">Categoria</th>
+                <th className="px-6 py-3 text-center">Qtd</th>
                 <th className="px-6 py-3 text-center">Status</th>
                 <th className="px-6 py-3 text-right">Ação</th>
               </tr>
@@ -97,10 +98,27 @@ export const PreShoppingList: React.FC<PreShoppingListProps> = ({ onAddItemsToLi
                     <td className="px-6 py-4 text-slate-500 text-sm">{item.category}</td>
                     <td className="px-6 py-4 text-center">
                       {itemInList ? (
+                        <div className="flex items-center justify-center gap-2">
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); onItemChange(itemInList.id, 'quantity', Math.max(0, (itemInList.quantity || 1) - 1)); }}
+                            className="p-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600"
+                          >-</button>
+                          <span className="font-bold w-6 text-center">{itemInList.quantity || 1}</span>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); onItemChange(itemInList.id, 'quantity', (itemInList.quantity || 1) + 1); }}
+                            className="p-1 rounded-full bg-violet-100 hover:bg-violet-200 text-violet-600"
+                          >+</button>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-slate-400">-</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      {itemInList ? (
                         <div className="flex flex-col items-center gap-1">
                           <span className={`inline-flex items-center text-[10px] font-medium px-2 py-0.5 rounded-full border ${isActive ? 'text-green-600 bg-green-50 border-green-100' : 'text-slate-400 bg-slate-100 border-slate-200'}`}>
                             {isActive ? <CheckCircle2 size={10} className="mr-1" /> : <PowerOff size={10} className="mr-1" />}
-                            {isActive ? 'Ativo na Lista' : 'Desativado'}
+                            {isActive ? 'Ativo' : 'Desativado'}
                           </span>
                         </div>
                       ) : (
