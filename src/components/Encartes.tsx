@@ -169,62 +169,71 @@ export const Encartes: React.FC<EncartesProps> = ({ deals, onAddDeal, onDeleteDe
           <p>Nenhuma oferta encontrada.</p>
         </div>
       ) : (
-        <div className="space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {Object.keys(dealsByMarket).map((marketName) => {
             const marketDeals = dealsByMarket[marketName];
             return (
-            <div key={marketName} className="bg-slate-50 rounded-xl p-4 border border-slate-200">
-              <div className="flex items-center gap-2 mb-4 pb-2 border-b border-slate-200">
-                <Store className="text-violet-600" size={24} />
-                <h3 className="text-xl font-bold text-slate-800">{marketName}</h3>
-                <span className="text-sm text-slate-500 ml-auto">{marketDeals.length} ofertas</span>
+              <div key={marketName} className="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden flex flex-col h-full">
+                <div className="bg-slate-50 p-4 border-b border-slate-200 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Store className="text-violet-600" size={20} />
+                    <h3 className="text-lg font-bold text-slate-800">{marketName}</h3>
+                  </div>
+                  <span className="text-xs font-medium bg-violet-100 text-violet-700 px-2 py-1 rounded-full">
+                    {marketDeals.length} ofertas
+                  </span>
+                </div>
+                
+                <div className="p-0 flex-grow">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-slate-50 text-slate-500 font-medium border-b border-slate-100">
+                      <tr>
+                        <th className="px-4 py-2">Produto</th>
+                        <th className="px-4 py-2 text-right">Preço</th>
+                        <th className="px-4 py-2 text-center">Status</th>
+                        <th className="px-4 py-2 text-right">Ação</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {marketDeals.map((deal) => {
+                        const inList = isItemInList(deal.itemName);
+                        return (
+                          <tr key={deal.id} className="hover:bg-slate-50 transition-colors group">
+                            <td className="px-4 py-3 font-medium text-slate-700">{deal.itemName}</td>
+                            <td className="px-4 py-3 text-right font-bold text-slate-900">
+                              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(deal.price)}
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              {inList ? (
+                                <span className="inline-flex items-center justify-center w-6 h-6 bg-green-100 text-green-600 rounded-full" title="Na Lista">
+                                  <CheckCircle size={14} />
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center justify-center w-6 h-6 bg-slate-100 text-slate-400 rounded-full" title="Extra">
+                                  <AlertCircle size={14} />
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-right">
+                              <button
+                                onClick={() => onDeleteDeal(deal.id)}
+                                className="text-slate-300 hover:text-red-500 transition-colors p-1"
+                                title="Excluir"
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+                <div className="bg-slate-50 p-3 text-xs text-slate-400 text-center border-t border-slate-100">
+                  Ofertas válidas até {new Date(marketDeals[0].date).toLocaleDateString('pt-BR')}
+                </div>
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {marketDeals.map((deal) => {
-                  const inList = isItemInList(deal.itemName);
-                  return (
-                    <div key={deal.id} className={`bg-white p-4 rounded-xl shadow-sm border hover:shadow-md transition-shadow relative group ${inList ? 'border-green-200 ring-1 ring-green-100' : 'border-slate-100'}`}>
-                      <button
-                        onClick={() => onDeleteDeal(deal.id)}
-                        className="absolute top-2 right-2 p-1.5 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Excluir oferta"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                      
-                      <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-semibold text-lg text-slate-800 capitalize pr-6">{deal.itemName}</h4>
-                      </div>
-                      
-                      <div className="flex items-center justify-between mt-2">
-                        <span className="bg-green-100 text-green-800 text-lg font-bold px-3 py-1 rounded-full">
-                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(deal.price)}
-                        </span>
-                        
-                        {inList ? (
-                          <span className="flex items-center text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-100" title="Item na sua lista de compras">
-                            <CheckCircle size={12} className="mr-1" />
-                            Na Lista
-                          </span>
-                        ) : (
-                          <span className="flex items-center text-xs font-medium text-slate-400 bg-slate-50 px-2 py-1 rounded-full border border-slate-100" title="Item não está na lista">
-                            <AlertCircle size={12} className="mr-1" />
-                            Extra
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="flex items-center text-xs text-slate-400 mt-3 pt-2 border-t border-slate-50">
-                        <Calendar size={12} className="mr-1.5" />
-                        {new Date(deal.date).toLocaleDateString('pt-BR')}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
+            );
           })}
         </div>
       )}

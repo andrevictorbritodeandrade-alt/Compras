@@ -266,6 +266,28 @@ export const INITIAL_DEALS: Deal[] = [
   { id: 'as-28', itemName: 'Batata Frita Prime Fries 2kg', price: 18.50, market: 'Assaí', date: '2026-02-27' },
   { id: 'as-29', itemName: 'Queijo Muçarela Natville (kg)', price: 31.50, market: 'Assaí', date: '2026-02-27' },
 
+  // Dom Atacadista (27/02 a 05/03)
+  { id: 'da-1', itemName: 'Contra Filé Friboi Peça (kg)', price: 39.90, market: 'Dom Atacadista', date: '2026-02-27' },
+  { id: 'da-2', itemName: 'Alcatra Bovina Peça (kg)', price: 34.90, market: 'Dom Atacadista', date: '2026-02-27' },
+  { id: 'da-3', itemName: 'Coxa com Sobrecoxa Dorsal (kg)', price: 6.99, market: 'Dom Atacadista', date: '2026-02-27' },
+  { id: 'da-4', itemName: 'Filé de Peito de Frango (kg)', price: 14.90, market: 'Dom Atacadista', date: '2026-02-27' },
+  { id: 'da-5', itemName: 'Linguiça Calabresa Perdigão (kg)', price: 19.90, market: 'Dom Atacadista', date: '2026-02-27' },
+  { id: 'da-6', itemName: 'Arroz Tio João 5kg', price: 24.90, market: 'Dom Atacadista', date: '2026-02-27' },
+  { id: 'da-7', itemName: 'Feijão Preto Kicaldo 1kg', price: 6.49, market: 'Dom Atacadista', date: '2026-02-27' },
+  { id: 'da-8', itemName: 'Açúcar União 1kg', price: 3.99, market: 'Dom Atacadista', date: '2026-02-27' },
+  { id: 'da-9', itemName: 'Óleo de Soja Liza 900ml', price: 5.99, market: 'Dom Atacadista', date: '2026-02-27' },
+  { id: 'da-10', itemName: 'Leite Integral Italac 1L', price: 4.29, market: 'Dom Atacadista', date: '2026-02-27' },
+  { id: 'da-11', itemName: 'Café Pilão 500g', price: 19.90, market: 'Dom Atacadista', date: '2026-02-27' },
+  { id: 'da-12', itemName: 'Cerveja Brahma Duplo Malte 350ml', price: 3.49, market: 'Dom Atacadista', date: '2026-02-27' },
+  { id: 'da-13', itemName: 'Cerveja Heineken 330ml', price: 5.49, market: 'Dom Atacadista', date: '2026-02-27' },
+  { id: 'da-14', itemName: 'Refrigerante Coca-Cola 2L', price: 8.99, market: 'Dom Atacadista', date: '2026-02-27' },
+  { id: 'da-15', itemName: 'Sabão em Pó Omo 1.6kg', price: 22.90, market: 'Dom Atacadista', date: '2026-02-27' },
+  { id: 'da-16', itemName: 'Amaciante Downy 1L', price: 16.90, market: 'Dom Atacadista', date: '2026-02-27' },
+  { id: 'da-17', itemName: 'Papel Higiênico Neve 12 rolos', price: 18.90, market: 'Dom Atacadista', date: '2026-02-27' },
+  { id: 'da-18', itemName: 'Detergente Ypê 500ml', price: 2.19, market: 'Dom Atacadista', date: '2026-02-27' },
+  { id: 'da-19', itemName: 'Biscoito Trakinas 126g', price: 2.49, market: 'Dom Atacadista', date: '2026-02-27' },
+  { id: 'da-20', itemName: 'Chocolate Barra Garoto 90g', price: 4.99, market: 'Dom Atacadista', date: '2026-02-27' },
+
   // Guanabara (28/02 a 03/03)
   { id: 'gb-1', itemName: 'Arroz Rei do Sul 5kg', price: 13.95, market: 'Guanabara', date: '2026-02-28' },
   { id: 'gb-2', itemName: 'Arroz Carreteiro 5kg', price: 15.95, market: 'Guanabara', date: '2026-02-28' },
