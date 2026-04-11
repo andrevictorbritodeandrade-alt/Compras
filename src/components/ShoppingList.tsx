@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { Category, ShoppingItem, Deal } from '../types';
 import { ShoppingItemRow } from './ShoppingItemRow';
+import { Search, Plus, Sparkles } from 'lucide-react';
 
 interface ShoppingListProps {
   categories: Category[];
@@ -9,6 +10,8 @@ interface ShoppingListProps {
   estimations: Map<string, { quantity: number; unit: string }>;
   meatEstimateKg: number;
   bestDeals: Map<string, Deal>;
+  masterList: string[];
+  onAddItems: (items: { name: string; category: string }[]) => void;
 }
 
 const categoryColors = [
@@ -40,23 +43,101 @@ const CategoryIcon: React.FC<CategoryIconProps> = ({ categoryName, className }) 
      return <svg xmlns="http://www.w3.org/2000/svg" className={iconClasses} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>;
 };
 
-export const ShoppingList: React.FC<ShoppingListProps> = ({ categories, onItemChange, onDeleteItem, estimations, meatEstimateKg, bestDeals }) => {
-  if (categories.length === 0) {
+export const ShoppingList: React.FC<ShoppingListProps> = ({ categories, onItemChange, onDeleteItem, estimations, meatEstimateKg, bestDeals, masterList, onAddItems }) => {
+  const [quickAddSearch, setQuickAddSearch] = useState('');
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
+
+  const filteredMasterList = masterList.filter(item => 
+    item.toLowerCase().includes(quickAddSearch.toLowerCase()) &&
+    !categories.some(cat => cat.items.some(i => i.name.toLowerCase() === item.toLowerCase() && i.active !== false))
+  ).slice(0, 5);
+
+  const handleQuickAdd = (itemName: string) => {
+    onAddItems([{ name: itemName, category: 'Outros' }]);
+    setQuickAddSearch('');
+    setShowQuickAdd(false);
+  };
+
+  const activeCategories = categories.filter(cat => cat.items.some(i => i.active !== false));
+
+  if (activeCategories.length === 0 && !showQuickAdd) {
     return (
-      <div className="text-center py-10 px-4 bg-white rounded-xl shadow-md">
-          <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div className="text-center py-10 px-4 bg-white rounded-xl shadow-md border-4 border-slate-200">
+          <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
-          <h3 className="mt-2 text-sm font-medium text-gray-900">Sua lista de compras está vazia</h3>
-          <p className="mt-1 text-sm text-gray-500">Adicione itens usando o formulário acima.</p>
+          <h3 className="mt-2 text-lg font-black text-slate-900 uppercase">Sua lista de compras está vazia</h3>
+          <p className="mt-1 text-sm text-slate-500 font-bold">Adicione itens ou use "//" para buscar na lista padrão.</p>
+          <button 
+            onClick={() => setShowQuickAdd(true)}
+            className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-full font-black uppercase hover:bg-blue-700 transition-transform active:scale-95"
+          >
+            Buscar na Lista Padrão (//)
+          </button>
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="space-y-4">
+        {/* Quick Add Bar */}
+        <div className="relative">
+            <div className="flex gap-2">
+                <div className="relative flex-1">
+                    <input
+                        type="text"
+                        placeholder="Digite // para buscar na lista padrão..."
+                        value={quickAddSearch}
+                        onChange={(e) => {
+                            setQuickAddSearch(e.target.value);
+                            if (e.target.value.startsWith('//')) {
+                                setShowQuickAdd(true);
+                            }
+                        }}
+                        className="w-full pl-10 pr-4 py-3 border-4 border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500 focus:border-blue-500 font-black uppercase text-sm"
+                    />
+                    <Search className="absolute left-3 top-3.5 text-slate-400" size={20} />
+                </div>
+                {showQuickAdd && (
+                    <button 
+                        onClick={() => { setShowQuickAdd(false); setQuickAddSearch(''); }}
+                        className="bg-slate-200 text-slate-600 px-4 py-2 rounded-xl font-black uppercase text-xs hover:bg-slate-300"
+                    >
+                        Fechar
+                    </button>
+                )}
+            </div>
+
+            {showQuickAdd && quickAddSearch.length > 0 && (
+                <div className="absolute z-50 w-full mt-2 bg-white border-4 border-slate-200 rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2">
+                    <div className="p-2 bg-slate-50 border-b-2 border-slate-100 flex items-center gap-2">
+                        <Sparkles size={16} className="text-yellow-500" />
+                        <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Sugestões da Lista Padrão</span>
+                    </div>
+                    {filteredMasterList.length > 0 ? (
+                        <div className="divide-y-2 divide-slate-100">
+                            {filteredMasterList.map((item, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => handleQuickAdd(item)}
+                                    className="w-full text-left px-4 py-3 hover:bg-blue-50 flex items-center justify-between group transition-colors"
+                                >
+                                    <span className="font-black text-slate-800 uppercase text-sm">{item}</span>
+                                    <Plus size={18} className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                </button>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="p-4 text-center text-slate-400 font-bold text-sm italic">
+                            Nenhum item encontrado na lista padrão.
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+
         {/* Desktop Header */}
-        <div className="hidden md:grid grid-cols-12 gap-2 px-4 py-3 text-left text-[10px] font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 rounded-t-lg border-b">
+        <div className="hidden md:grid grid-cols-12 gap-2 px-4 py-3 text-left text-sm md:text-base font-black text-slate-500 uppercase tracking-widest bg-slate-100 rounded-t-lg border-b-4 border-slate-200">
             <div className="col-span-1 text-center">Status</div>
             <div className="col-span-1 text-center">Check</div>
             <div className="col-span-3">Produto</div>
@@ -67,7 +148,7 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ categories, onItemCh
             <div className="col-span-1 text-right">Ações</div>
         </div>
         {/* Mobile Header */}
-        <div className="grid md:hidden grid-cols-12 gap-x-1 px-2 py-2 text-center text-[10px] font-semibold text-gray-500 uppercase tracking-wider bg-gray-50 rounded-t-lg border-b">
+        <div className="grid md:hidden grid-cols-12 gap-x-1 px-2 py-2 text-center text-xs font-black text-slate-500 uppercase tracking-widest bg-slate-100 rounded-t-lg border-b-4 border-slate-200">
             <div className="col-span-1">St.</div>
             <div className="col-span-1">Ck.</div>
             <div className="col-span-3 text-left">Produto</div>
@@ -77,26 +158,26 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ categories, onItemCh
             <div className="col-span-1"></div>
         </div>
 
-        {categories.map((category, index) => {
+        {activeCategories.map((category, index) => {
             let categoryInfo = null;
             if (category.name.toLowerCase() === 'carnes' && estimations.size > 0) {
                 const totalOnList = category.items.reduce((sum, item) => sum + Number(item.quantity), 0);
                 categoryInfo = (
-                    <span className="ml-4 text-sm font-normal normal-case text-gray-600">
+                    <span className="ml-4 text-sm font-bold normal-case text-slate-600">
                         (Adicionado: {totalOnList.toFixed(1)}kg de {meatEstimateKg.toFixed(1)}kg estimados)
                     </span>
                 );
             }
 
             return (
-                <div key={category.id} className="mb-2 border-t first:border-t-0">
-                <div className={`flex items-center p-3 ${categoryColors[index % categoryColors.length].bg} ${categoryColors[index % categoryColors.length].border}`}>
-                    <CategoryIcon categoryName={category.name} className={categoryColors[index % categoryColors.length].icon} />
-                    <h2 className={`text-xl font-bold ${categoryColors[index % categoryColors.length].text}`}>{category.name}</h2>
+                <div key={category.id} className="mb-4 border-4 border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                <div className={`flex items-center p-4 bg-slate-100 border-b-4 border-slate-200`}>
+                    <CategoryIcon categoryName={category.name} className="text-blue-600" />
+                    <h2 className={`text-2xl md:text-3xl font-black text-slate-900 uppercase tracking-tight`}>{category.name}</h2>
                     {categoryInfo}
                 </div>
-                <div className="bg-white rounded-b-lg shadow-sm">
-                    {category.items.map(item => (
+                <div className="bg-white">
+                    {category.items.filter(i => i.active !== false).map(item => (
                     <ShoppingItemRow 
                         key={item.id} 
                         item={item} 

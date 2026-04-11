@@ -39,3 +39,10 @@ export interface MonthlyHistory {
   month: string;
   total: number;
 }
+
+export interface Purchase {
+  id: number;
+  date: string;
+  total: number;
+  itemCount: number;
+}

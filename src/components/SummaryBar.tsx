@@ -13,33 +13,33 @@ const formatCurrency = (value: number) => {
 
 export const SummaryBar: React.FC<SummaryBarProps> = ({ total, itemCount, activeItemCount }) => {
   return (
-    <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-violet-100 shadow-sm transition-all duration-300">
+    <div className="sticky top-0 z-50 bg-white border-b-4 border-slate-200 shadow-md transition-all duration-300">
       <div className="container mx-auto px-4 py-3">
         <div className="flex flex-wrap items-center justify-between gap-4">
           {/* Left Side: Stats */}
           <div className="flex items-center space-x-4">
-            <div className="flex items-center text-slate-600">
-              <ShoppingBag size={18} className="mr-2 text-violet-500" />
+            <div className="flex items-center text-slate-800">
+              <ShoppingBag size={24} className="mr-2 text-blue-600" />
               <div className="flex flex-col">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Itens Ativos</span>
-                <span className="text-sm font-bold">{activeItemCount} de {itemCount}</span>
+                <span className="text-xs uppercase font-black tracking-widest text-slate-500">Itens Ativos</span>
+                <span className="text-lg font-black">{activeItemCount} de {itemCount}</span>
               </div>
             </div>
-            <div className="hidden sm:flex items-center text-slate-600">
-              <TrendingUp size={18} className="mr-2 text-emerald-500" />
+            <div className="hidden sm:flex items-center text-slate-800">
+              <TrendingUp size={24} className="mr-2 text-yellow-500" />
               <div className="flex flex-col">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Média/Item</span>
-                <span className="text-sm font-bold">{formatCurrency(activeItemCount > 0 ? total / activeItemCount : 0)}</span>
+                <span className="text-xs uppercase font-black tracking-widest text-slate-500">Média/Item</span>
+                <span className="text-lg font-black">{formatCurrency(activeItemCount > 0 ? total / activeItemCount : 0)}</span>
               </div>
             </div>
           </div>
 
           {/* Right Side: Total (The "Calculator" result) */}
-          <div className="flex items-center bg-violet-600 text-white px-6 py-2 rounded-2xl shadow-lg shadow-violet-200">
-            <Calculator size={24} className="mr-3 opacity-80" />
+          <div className="flex items-center bg-green-600 text-white px-6 py-3 rounded-2xl shadow-lg border-4 border-green-700">
+            <Calculator size={28} className="mr-3 text-yellow-300" />
             <div className="flex flex-col items-end">
-              <span className="text-[10px] uppercase font-bold tracking-wider opacity-80">Total Estimado</span>
-              <span className="text-2xl font-black tracking-tight">{formatCurrency(total)}</span>
+              <span className="text-xs uppercase font-black tracking-widest text-green-100">Total Estimado</span>
+              <span className="text-3xl font-black tracking-tighter">{formatCurrency(total)}</span>
             </div>
           </div>
         </div>

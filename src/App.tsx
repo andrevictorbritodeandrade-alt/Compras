@@ -6,10 +6,10 @@ import { AddItemForm } from './components/AddItemForm';
 import { Encartes } from './components/Encartes';
 import { PreShoppingList } from './components/PreShoppingList';
 import { MonthlyHistory } from './components/MonthlyHistory';
-import { INITIAL_CATEGORIES } from './constants';
+import { INITIAL_CATEGORIES, EXTRACTED_ITEMS, MARKET_PRICES } from './constants';
 import type { Category, ShoppingItem, Estimation, Deal, MonthlyHistory as MonthlyHistoryType } from './types';
 import { db } from './firebase/config';
-import { doc, onSnapshot, setDoc, updateDoc, collection, getDocs, writeBatch } from 'firebase/firestore';
+import { doc, onSnapshot, setDoc, updateDoc, collection, getDocs, writeBatch, arrayUnion } from 'firebase/firestore';
 import { Logo } from './components/Logo';
 import { GoogleGenAI } from '@google/genai';
 import { AIAssistant } from './components/AIAssistant';
@@ -26,8 +26,10 @@ interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
 }
 
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
 const App: React.FC = () => {
-  const [activeMonth, setActiveMonth] = useState<string>('November');
+  const [activeMonth, setActiveMonth] = useState<string>(MONTHS[new Date().getMonth()]);
   const [currentShoppingList, setCurrentShoppingList] = useState<Category[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [history, setHistory] = useState<MonthlyHistoryType[]>([]);
@@ -39,6 +41,35 @@ const App: React.FC = () => {
   const [isAIAssistantOpen, setIsAIAssistantOpen] = useState(false);
   const [estimations, setEstimations] = useState<Map<string, { quantity: number; unit: string }>>(new Map());
   const [isEstimating, setIsEstimating] = useState(false);
+  const [purchases, setPurchases] = useState<any[]>([]);
+  const [currentDateFormatted, setCurrentDateFormatted] = useState('');
+  const [masterList, setMasterList] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchMasterList = async () => {
+      try {
+        const masterRef = collection(db, 'masterList');
+        const snapshot = await getDocs(masterRef);
+        const items = snapshot.docs.map(doc => doc.id);
+        setMasterList(items.length > 0 ? items : EXTRACTED_ITEMS);
+      } catch (error) {
+        console.error('Error fetching master list:', error);
+        setMasterList(EXTRACTED_ITEMS);
+      }
+    };
+    fetchMasterList();
+  }, []);
+
+  useEffect(() => {
+    const updateDate = () => {
+      const now = new Date();
+      const options: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+      setCurrentDateFormatted(now.toLocaleDateString('pt-BR', options).toUpperCase());
+    };
+    updateDate();
+    const interval = setInterval(updateDate, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Seed initial deals
   useEffect(() => {
@@ -152,11 +183,13 @@ const App: React.FC = () => {
         }));
         setCurrentShoppingList(sortedCategories);
         setDeals(dealsFromDb);
+        setPurchases(data.purchases || []);
       } else {
         console.log(`No document for ${activeMonth}, creating one.`);
-        setDoc(docRef, { categories: INITIAL_CATEGORIES, deals: [] });
+        setDoc(docRef, { categories: INITIAL_CATEGORIES, deals: [], purchases: [] });
         setCurrentShoppingList(INITIAL_CATEGORIES);
         setDeals([]);
+        setPurchases([]);
       }
       setIsLoading(false);
     }, (error) => {
@@ -237,6 +270,16 @@ const App: React.FC = () => {
     const docRef = doc(db, 'shoppingLists', activeMonth);
     const newCategories = JSON.parse(JSON.stringify(currentShoppingList));
 
+    const getBestPrice = (itemName: string) => {
+        const originalName = EXTRACTED_ITEMS.find(i => i.toLowerCase() === itemName.toLowerCase());
+        if (!originalName) return 0;
+        const prices = MARKET_PRICES[originalName];
+        if (!prices) return 0;
+        const validPrices = Object.values(prices).filter(p => p !== null) as number[];
+        if (validPrices.length === 0) return 0;
+        return Math.min(...validPrices);
+    };
+
     itemsToAdd.forEach((itemToAdd, index) => {
       let category = newCategories.find((cat: Category) => cat.name.toLowerCase() === itemToAdd.category.toLowerCase());
 
@@ -249,18 +292,20 @@ const App: React.FC = () => {
         newCategories.push(category);
       }
 
-      const itemExists = category.items.some((i: ShoppingItem) => i.name.toLowerCase() === itemToAdd.name.toLowerCase());
+      const existingItem = category.items.find((i: ShoppingItem) => i.name.toLowerCase() === itemToAdd.name.toLowerCase());
 
-      if (!itemExists) {
+      if (!existingItem) {
         category.items.push({
           id: Date.now() + 1000 + index,
           name: itemToAdd.name,
           quantity: 1,
-          price: 0,
+          price: getBestPrice(itemToAdd.name),
           active: true,
           checked: false
         });
         category.items.sort((a: ShoppingItem, b: ShoppingItem) => a.name.localeCompare(b.name, 'pt-BR'));
+      } else {
+        existingItem.active = true;
       }
     });
 
@@ -402,6 +447,82 @@ const App: React.FC = () => {
   }, [activeMonth, currentShoppingList, itemToCategoryMap]);
 
 
+  const handleSyncAIExtractedList = useCallback(async () => {
+    if (!window.confirm("Isso vai atualizar sua lista atual com os itens extraídos da imagem (desligando os que não estão na imagem). Deseja continuar?")) return;
+
+    const extractedItems = EXTRACTED_ITEMS.map(i => i.toLowerCase());
+
+    const docRef = doc(db, 'shoppingLists', activeMonth);
+    const newCategories = JSON.parse(JSON.stringify(currentShoppingList));
+
+    // Helper to get best price from MARKET_PRICES
+    const getBestPrice = (itemName: string) => {
+        const originalName = EXTRACTED_ITEMS.find(i => i.toLowerCase() === itemName.toLowerCase());
+        if (!originalName) return 0;
+        const prices = MARKET_PRICES[originalName];
+        if (!prices) return 0;
+        const validPrices = Object.values(prices).filter(p => p !== null) as number[];
+        if (validPrices.length === 0) return 0;
+        return Math.min(...validPrices);
+    };
+
+    // First, set all existing items to inactive
+    newCategories.forEach((category: Category) => {
+      category.items.forEach((item: ShoppingItem) => {
+        item.active = false;
+      });
+    });
+
+    // Then, activate and add the extracted items
+    extractedItems.forEach((itemName, index) => {
+      const categoryName = itemToCategoryMap.get(itemName);
+      if (!categoryName) {
+        console.warn(`Category not found for extracted item: ${itemName}`);
+        return;
+      }
+
+      let category = newCategories.find((cat: Category) => cat.name === categoryName);
+
+      if (!category) {
+        const initialCategory = INITIAL_CATEGORIES.find(c => c.name === categoryName);
+        category = {
+          id: initialCategory ? initialCategory.id : Date.now() + index,
+          name: categoryName,
+          items: []
+        };
+        newCategories.push(category);
+      }
+
+      let item = category.items.find((i: ShoppingItem) => i.name.toLowerCase() === itemName);
+      const bestPrice = getBestPrice(itemName);
+
+      if (item) {
+        item.active = true;
+        item.quantity = item.quantity > 0 ? item.quantity : 1;
+        if (bestPrice > 0 && item.price === 0) {
+            item.price = bestPrice;
+        }
+      } else {
+        // Find original name case from INITIAL_CATEGORIES
+        const originalItem = INITIAL_CATEGORIES.find(c => c.name === categoryName)?.items.find(i => i.name.toLowerCase() === itemName);
+        
+        const newItem: ShoppingItem = {
+          id: Date.now() + 2000 + index,
+          name: originalItem ? originalItem.name : EXTRACTED_ITEMS.find(i => i.toLowerCase() === itemName) || itemName,
+          quantity: 1,
+          price: bestPrice,
+          active: true,
+          checked: false
+        };
+        category.items.push(newItem);
+        category.items.sort((a: ShoppingItem, b: ShoppingItem) => a.name.localeCompare(b.name, 'pt-BR'));
+      }
+    });
+
+    await updateDoc(docRef, { categories: newCategories });
+    alert("Lista sincronizada com sucesso!");
+  }, [activeMonth, currentShoppingList, itemToCategoryMap]);
+
   const itemCount = useMemo(() => {
     return currentShoppingList.reduce((acc, cat) => acc + cat.items.length, 0);
   }, [currentShoppingList]);
@@ -413,7 +534,7 @@ const App: React.FC = () => {
   const totalCost = useMemo(() => {
     if (!currentShoppingList) return 0;
     return currentShoppingList.reduce((total, category) => {
-      return total + category.items.reduce((categoryTotal, item) => {
+      return total + category.items.filter(i => i.active !== false).reduce((categoryTotal, item) => {
         return categoryTotal + (Number(item.quantity) * Number(item.price));
       }, 0);
     }, 0);
@@ -432,7 +553,25 @@ const App: React.FC = () => {
   const meatEstimateKg = useMemo(() => (0.3 * 2 * 31), []);
 
   const bestDeals = useMemo(() => {
-    const best = new Map<string, Deal>();
+    const best = new Map<string, { price: number; market: string; date: string }>();
+    
+    // First, add from MARKET_PRICES
+    Object.entries(MARKET_PRICES).forEach(([itemName, prices]) => {
+        const key = itemName.toLowerCase();
+        let minPrice = Infinity;
+        let bestMarket = '';
+        Object.entries(prices).forEach(([market, price]) => {
+            if (price !== null && price < minPrice) {
+                minPrice = price;
+                bestMarket = market;
+            }
+        });
+        if (minPrice !== Infinity) {
+            best.set(key, { price: minPrice, market: bestMarket, date: '2026-04-11' });
+        }
+    });
+
+    // Then, override with user deals if cheaper
     deals.forEach(deal => {
         const key = deal.itemName.toLowerCase();
         const currentBest = best.get(key);
@@ -443,37 +582,69 @@ const App: React.FC = () => {
     return best;
   }, [deals]);
 
+  const handleFinalizePurchase = useCallback(async () => {
+    if (!window.confirm("Deseja registrar esta compra no histórico de hoje?")) return;
+    const docRef = doc(db, 'shoppingLists', activeMonth);
+    const newPurchase = {
+      id: Date.now(),
+      date: new Date().toISOString(),
+      total: totalCost,
+      itemCount: activeItemCount
+    };
+    
+    // Update purchases history
+    await updateDoc(docRef, {
+      purchases: arrayUnion(newPurchase)
+    });
+
+    // Update Master List with checked items
+    const checkedItems = currentShoppingList.flatMap(cat => cat.items.filter(i => i.checked).map(i => i.name));
+    if (checkedItems.length > 0) {
+      const batch = writeBatch(db);
+      checkedItems.forEach(itemName => {
+        const itemRef = doc(db, 'masterList', itemName.toLowerCase());
+        batch.set(itemRef, { name: itemName, lastBought: new Date().toISOString() }, { merge: true });
+      });
+      await batch.commit();
+      
+      // Update local master list state
+      setMasterList(prev => [...new Set([...prev, ...checkedItems.map(i => i.toLowerCase())])]);
+    }
+
+    alert("Compra finalizada e registrada com sucesso!");
+  }, [activeMonth, totalCost, activeItemCount, currentShoppingList]);
+
   return (
-    <div className="min-h-screen font-sans bg-gradient-to-b from-violet-400 to-white">
+    <div className="min-h-screen font-sans bg-white text-slate-900">
       {!isOnline && (
-        <div className="bg-amber-500 text-white text-center py-1 text-xs font-bold sticky top-0 z-[60]">
+        <div className="bg-yellow-500 text-black text-center py-2 text-sm font-black uppercase sticky top-0 z-[60]">
           Modo Offline Ativo - Suas alterações serão sincronizadas quando houver internet
         </div>
       )}
-      <header className="bg-transparent text-slate-800">
-        <div className="container mx-auto px-4 pt-8 pb-4 flex flex-col items-center">
-            <Logo className="h-16 w-16 mb-4" />
-            <h1 className="text-4xl md:text-5xl font-bold">Compras do Mês</h1>
+      <header className="bg-red-600 text-white uppercase font-black shadow-md">
+        <div className="container mx-auto px-4 pt-8 pb-6 flex flex-col items-center">
+            <div className="text-yellow-300 text-lg md:text-xl mb-2 tracking-wider">{currentDateFormatted}</div>
+            <h1 className="text-4xl md:text-6xl font-black tracking-tighter drop-shadow-sm">COMPRAS DO MÊS</h1>
             <div className="flex items-center gap-4">
-                <p className="text-violet-700 mt-2">Seu assistente pessoal de orçamento de compras</p>
+                <p className="text-red-100 mt-2 text-sm md:text-base font-bold tracking-wide">SEU ASSISTENTE PESSOAL DE ORÇAMENTO</p>
             </div>
-            <div className="flex gap-4 mt-4">
+            <div className="flex gap-4 mt-6">
                  <button
                     onClick={handleInstallClick}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className="inline-flex items-center px-6 py-3 border-4 border-transparent text-sm md:text-base font-black rounded-full shadow-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-blue-500 transition-transform active:scale-95 uppercase"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
-                    Instalar App
+                    INSTALAR APP
                   </button>
                 <button
                     onClick={() => setIsAIAssistantOpen(true)}
                     disabled={!isOnline}
-                    className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-full shadow-sm text-white ${!isOnline ? 'bg-slate-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500`}
+                    className={`inline-flex items-center px-6 py-3 border-4 border-transparent text-sm md:text-base font-black rounded-full shadow-lg ${!isOnline ? 'bg-slate-400 text-slate-200 cursor-not-allowed' : 'bg-yellow-500 text-black hover:bg-yellow-400'} focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-yellow-500 transition-transform active:scale-95 uppercase`}
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
-                    {isOnline ? 'Estimar com IA' : 'IA Indisponível (Offline)'}
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                    {isOnline ? 'ESTIMAR COM IA' : 'IA INDISPONÍVEL'}
                 </button>
             </div>
         </div>
@@ -490,11 +661,22 @@ const App: React.FC = () => {
       />
 
       {activeTab === 'list' && (
-        <SummaryBar 
-          total={totalCost} 
-          itemCount={itemCount} 
-          activeItemCount={activeItemCount} 
-        />
+        <>
+          <SummaryBar 
+            total={totalCost} 
+            itemCount={itemCount} 
+            activeItemCount={activeItemCount} 
+          />
+          <div className="container mx-auto px-4 mt-4 mb-2 flex justify-center">
+            <button
+              onClick={handleFinalizePurchase}
+              className="bg-green-600 text-white font-black uppercase px-8 py-4 rounded-full shadow-lg hover:bg-green-700 transition-transform active:scale-95 flex items-center gap-2 text-lg border-4 border-green-700"
+            >
+              <ShoppingCart size={24} />
+              Finalizar Compra de Hoje
+            </button>
+          </div>
+        </>
       )}
       
       <div className="container mx-auto px-4 mb-6">
@@ -519,7 +701,7 @@ const App: React.FC = () => {
                 }`}
             >
                 <ListTodo className="w-5 h-5 mr-2" />
-                Antes das Compras
+                Faltando em casa
             </button>
             <button
                 onClick={() => setActiveTab('encartes')}
@@ -570,14 +752,18 @@ const App: React.FC = () => {
                             estimations={estimations}
                             meatEstimateKg={meatEstimateKg}
                             bestDeals={bestDeals}
+                            masterList={masterList}
+                            onAddItems={handleAddItemsFromPreShopping}
                         />
                     </>
                 )}
                 {activeTab === 'pre-list' && (
                     <PreShoppingList 
-                      onAddItemsToList={handleAddItemsFromPreShopping}
+                      onSyncAIList={handleSyncAIExtractedList}
                       currentShoppingList={currentShoppingList}
                       onItemChange={handleItemChange}
+                      onAddItemsToList={handleAddItemsFromPreShopping}
+                      masterList={masterList}
                     />
                 )}
                 {activeTab === 'encartes' && (
@@ -590,7 +776,7 @@ const App: React.FC = () => {
                     />
                 )}
                 {activeTab === 'history' && (
-                    <MonthlyHistory history={history} />
+                    <MonthlyHistory history={history} purchases={purchases} />
                 )}
             </>
         )}
