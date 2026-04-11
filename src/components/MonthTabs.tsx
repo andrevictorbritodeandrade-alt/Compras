@@ -27,7 +27,7 @@ export const MonthTabs: React.FC<MonthTabsProps> = ({ activeMonth, onMonthChange
       <button
         key={month}
         onClick={() => onMonthChange(month)}
-        className={`flex-1 min-w-[60px] whitespace-nowrap py-2 px-2 rounded-lg font-black text-xs transition-transform active:scale-95 uppercase tracking-wider
+        className={`flex-1 min-w-[60px] whitespace-nowrap py-2 px-2 rounded-lg font-black text-sm md:text-base transition-transform active:scale-95 uppercase tracking-wider
           ${isActive
             ? 'bg-yellow-400 text-black shadow-md border-2 border-yellow-500'
             : 'bg-red-600 text-white hover:bg-red-500 border-2 border-transparent'

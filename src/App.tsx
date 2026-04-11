@@ -680,10 +680,10 @@ const App: React.FC = () => {
       )}
       
       <div className="container mx-auto px-4 mb-6">
-        <div className="flex justify-center space-x-2 md:space-x-4 overflow-x-auto no-scrollbar py-2">
+        <div className="flex justify-start md:justify-center overflow-x-auto no-scrollbar gap-2 md:gap-4 py-2">
             <button
                 onClick={() => setActiveTab('list')}
-                className={`flex items-center px-4 md:px-6 py-3 rounded-full font-medium transition-all whitespace-nowrap ${
+                className={`flex items-center px-4 md:px-6 py-3 rounded-full font-bold text-base md:text-lg transition-all whitespace-nowrap ${
                     activeTab === 'list' 
                     ? 'bg-white text-violet-700 shadow-md' 
                     : 'bg-white/30 text-slate-700 hover:bg-white/50'
@@ -694,7 +694,7 @@ const App: React.FC = () => {
             </button>
             <button
                 onClick={() => setActiveTab('pre-list')}
-                className={`flex items-center px-4 md:px-6 py-3 rounded-full font-medium transition-all whitespace-nowrap ${
+                className={`flex items-center px-4 md:px-6 py-3 rounded-full font-bold text-base md:text-lg transition-all whitespace-nowrap ${
                     activeTab === 'pre-list' 
                     ? 'bg-white text-violet-700 shadow-md' 
                     : 'bg-white/30 text-slate-700 hover:bg-white/50'
@@ -705,7 +705,7 @@ const App: React.FC = () => {
             </button>
             <button
                 onClick={() => setActiveTab('encartes')}
-                className={`flex items-center px-4 md:px-6 py-3 rounded-full font-medium transition-all whitespace-nowrap ${
+                className={`flex items-center px-4 md:px-6 py-3 rounded-full font-bold text-base md:text-lg transition-all whitespace-nowrap ${
                     activeTab === 'encartes' 
                     ? 'bg-white text-violet-700 shadow-md' 
                     : 'bg-white/30 text-slate-700 hover:bg-white/50'
@@ -716,7 +716,7 @@ const App: React.FC = () => {
             </button>
             <button
                 onClick={() => setActiveTab('history')}
-                className={`flex items-center px-4 md:px-6 py-3 rounded-full font-medium transition-all whitespace-nowrap ${
+                className={`flex items-center px-4 md:px-6 py-3 rounded-full font-bold text-base md:text-lg transition-all whitespace-nowrap ${
                     activeTab === 'history' 
                     ? 'bg-white text-violet-700 shadow-md' 
                     : 'bg-white/30 text-slate-700 hover:bg-white/50'
