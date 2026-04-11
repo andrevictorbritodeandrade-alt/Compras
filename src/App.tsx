@@ -19,7 +19,14 @@ import { INITIAL_DEALS } from './data/initialDeals';
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 const App: React.FC = () => {
-  const [activeMonth, setActiveMonth] = useState<string>(MONTHS[new Date().getMonth()]);
+  const [activeMonth, setActiveMonth] = useState<string>(() => {
+    const savedMonth = localStorage.getItem('activeMonth');
+    return savedMonth || MONTHS[new Date().getMonth()];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('activeMonth', activeMonth);
+  }, [activeMonth]);
   const [currentShoppingList, setCurrentShoppingList] = useState<Category[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [history, setHistory] = useState<MonthlyHistoryType[]>([]);
@@ -185,6 +192,42 @@ const App: React.FC = () => {
     }
     
     await updateDoc(docRef, { categories: newCategories });
+  }, [activeMonth, currentShoppingList]);
+
+  const handleCategoryChange = useCallback(async (itemId: number, newCategoryName: string) => {
+    const docRef = doc(db, 'shoppingLists', activeMonth);
+    const newCategories = JSON.parse(JSON.stringify(currentShoppingList));
+    
+    let itemToMove: ShoppingItem | null = null;
+    let oldCategoryIndex = -1;
+
+    for (let i = 0; i < newCategories.length; i++) {
+        const itemIndex = newCategories[i].items.findIndex((item: ShoppingItem) => item.id === itemId);
+        if (itemIndex > -1) {
+            itemToMove = newCategories[i].items.splice(itemIndex, 1)[0];
+            oldCategoryIndex = i;
+            break;
+        }
+    }
+
+    if (itemToMove) {
+        let newCategory = newCategories.find((cat: Category) => cat.name.toLowerCase() === newCategoryName.toLowerCase());
+        if (!newCategory) {
+            newCategory = {
+                id: Date.now(),
+                name: newCategoryName,
+                items: []
+            };
+            newCategories.push(newCategory);
+        }
+        newCategory.items.push(itemToMove);
+        newCategory.items.sort((a: ShoppingItem, b: ShoppingItem) => a.name.localeCompare(b.name, 'pt-BR'));
+        
+        // Remove empty categories
+        const finalCategories = newCategories.filter((cat: Category) => cat.items.length > 0);
+        
+        await updateDoc(docRef, { categories: finalCategories });
+    }
   }, [activeMonth, currentShoppingList]);
 
   const handleDeleteItem = useCallback(async (itemId: number) => {
@@ -705,6 +748,7 @@ const App: React.FC = () => {
                             bestDeals={bestDeals}
                             masterList={masterList}
                             onAddItems={handleAddItemsFromPreShopping}
+                            onCategoryChange={handleCategoryChange}
                         />
                     </>
                 )}

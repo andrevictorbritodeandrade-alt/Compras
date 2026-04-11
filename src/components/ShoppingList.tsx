@@ -5,13 +5,14 @@ import { Search, Plus, Sparkles } from 'lucide-react';
 
 interface ShoppingListProps {
   categories: Category[];
-  onItemChange: (itemId: number, field: keyof ShoppingItem, value: string | number) => void;
+  onItemChange: (itemId: number, field: keyof ShoppingItem, value: string | number | boolean) => void;
   onDeleteItem: (itemId: number) => void;
   estimations: Map<string, { quantity: number; unit: string }>;
   meatEstimateKg: number;
   bestDeals: Map<string, Deal>;
   masterList: string[];
   onAddItems: (items: { name: string; category: string }[]) => void;
+  onCategoryChange: (itemId: number, newCategoryName: string) => void;
 }
 
 const categoryColors = [
@@ -43,7 +44,7 @@ const CategoryIcon: React.FC<CategoryIconProps> = ({ categoryName, className }) 
      return <svg xmlns="http://www.w3.org/2000/svg" className={iconClasses} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>;
 };
 
-export const ShoppingList: React.FC<ShoppingListProps> = ({ categories, onItemChange, onDeleteItem, estimations, meatEstimateKg, bestDeals, masterList, onAddItems }) => {
+export const ShoppingList: React.FC<ShoppingListProps> = ({ categories, onItemChange, onDeleteItem, estimations, meatEstimateKg, bestDeals, masterList, onAddItems, onCategoryChange }) => {
   const [quickAddSearch, setQuickAddSearch] = useState('');
   const [showQuickAdd, setShowQuickAdd] = useState(false);
 
@@ -199,6 +200,8 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ categories, onItemCh
                                             onDeleteItem={onDeleteItem}
                                             estimation={estimations.get(item.name.toLowerCase())}
                                             bestDeal={bestDeals.get(item.name.toLowerCase())}
+                                            categories={categories}
+                                            onCategoryChange={onCategoryChange}
                                         />
                                     ))}
                                 </div>

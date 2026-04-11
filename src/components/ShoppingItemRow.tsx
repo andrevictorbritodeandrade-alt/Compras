@@ -1,5 +1,5 @@
-import React from 'react';
-import { ShoppingItem } from '../types';
+import React, { useState, useEffect } from 'react';
+import { ShoppingItem, Category } from '../types';
 import { Trash2, TrendingDown, Power, PowerOff, CheckCircle2, Circle } from 'lucide-react';
 
 interface ShoppingItemRowProps {
@@ -8,6 +8,8 @@ interface ShoppingItemRowProps {
   onDeleteItem: (itemId: number) => void;
   estimation?: { quantity: number; unit: string };
   bestDeal?: { price: number; market: string; date: string };
+  categories: Category[];
+  onCategoryChange: (itemId: number, newCategoryName: string) => void;
 }
 
 export const ShoppingItemRow: React.FC<ShoppingItemRowProps> = ({
@@ -16,10 +18,26 @@ export const ShoppingItemRow: React.FC<ShoppingItemRowProps> = ({
   onDeleteItem,
   estimation,
   bestDeal,
+  categories,
+  onCategoryChange,
 }) => {
-  const subtotal = item.quantity * item.price;
-  const isActive = item.active !== false; // Default to true
-  const isChecked = item.checked === true;
+  const [localItem, setLocalItem] = useState(item);
+  const [localCategory, setLocalCategory] = useState(categories.find(c => c.items.some(i => i.id === item.id))?.name || '');
+
+  useEffect(() => {
+    setLocalItem(item);
+    setLocalCategory(categories.find(c => c.items.some(i => i.id === item.id))?.name || '');
+  }, [item, categories]);
+
+  const subtotal = localItem.quantity * localItem.price;
+  const isActive = localItem.active !== false; // Default to true
+  const isChecked = localItem.checked === true;
+
+  const handleBlur = (field: keyof ShoppingItem, value: string | number | boolean) => {
+    if (value !== item[field]) {
+      onItemChange(item.id, field, value);
+    }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -61,18 +79,32 @@ export const ShoppingItemRow: React.FC<ShoppingItemRowProps> = ({
         )}
       </div>
 
-      {/* Product Name */}
+      {/* Product Name and Category */}
       <div className={`col-span-3 md:col-span-3 font-black text-slate-900 truncate ${isChecked ? 'line-through text-slate-400' : ''}`}>
         <input
           type="text"
-          value={item.name}
-          onChange={(e) => onItemChange(item.id, 'name', e.target.value)}
+          value={localItem.name}
+          onChange={(e) => setLocalItem({...localItem, name: e.target.value})}
+          onBlur={() => handleBlur('name', localItem.name)}
           className="w-full bg-transparent border-none focus:ring-0 p-0 text-lg md:text-xl font-black text-slate-900 uppercase"
           disabled={!isActive}
         />
         <select
-          value={item.market || ''}
-          onChange={(e) => onItemChange(item.id, 'market', e.target.value)}
+          value={localCategory}
+          onChange={(e) => onCategoryChange(item.id, e.target.value)}
+          className="w-full text-xs bg-slate-100 rounded p-1 mt-1 font-bold text-slate-600"
+          disabled={!isActive}
+        >
+          {categories.map(cat => (
+            <option key={cat.id} value={cat.name}>{cat.name}</option>
+          ))}
+        </select>
+        <select
+          value={localItem.market || ''}
+          onChange={(e) => {
+            setLocalItem({...localItem, market: e.target.value});
+            onItemChange(item.id, 'market', e.target.value);
+          }}
           className="w-full text-xs bg-slate-100 rounded p-1 mt-1 font-bold text-slate-600"
           disabled={!isActive}
         >
@@ -99,8 +131,9 @@ export const ShoppingItemRow: React.FC<ShoppingItemRowProps> = ({
       <div className="col-span-1 text-center">
         <input
           type="number"
-          value={item.quantity}
-          onChange={(e) => onItemChange(item.id, 'quantity', Number(e.target.value))}
+          value={localItem.quantity}
+          onChange={(e) => setLocalItem({...localItem, quantity: Number(e.target.value)})}
+          onBlur={() => handleBlur('quantity', localItem.quantity)}
           className="w-full text-center bg-slate-100 border-2 border-slate-300 rounded-lg py-1 px-1 text-base md:text-lg font-black focus:ring-blue-500 focus:border-blue-500"
           min="0"
           disabled={!isActive}
@@ -125,10 +158,11 @@ export const ShoppingItemRow: React.FC<ShoppingItemRowProps> = ({
           <input
             type="number"
             data-type="price"
-            value={item.price}
-            onChange={(e) => onItemChange(item.id, 'price', Number(e.target.value))}
+            value={localItem.price}
+            onChange={(e) => setLocalItem({...localItem, price: Number(e.target.value)})}
+            onBlur={() => handleBlur('price', localItem.price)}
             onKeyDown={handleKeyDown}
-            className={`block w-full rounded-lg border-2 border-slate-300 pl-7 pr-2 py-1 text-base md:text-lg font-black focus:border-blue-500 focus:ring-blue-500 text-right ${bestDeal && item.price > bestDeal.price ? 'text-red-600' : 'text-slate-900'}`}
+            className={`block w-full rounded-lg border-2 border-slate-300 pl-7 pr-2 py-1 text-base md:text-lg font-black focus:border-blue-500 focus:ring-blue-500 text-right ${bestDeal && localItem.price > bestDeal.price ? 'text-red-600' : 'text-slate-900'}`}
             min="0"
             step="0.01"
             disabled={!isActive}
