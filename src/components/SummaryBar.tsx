@@ -15,9 +15,9 @@ export const SummaryBar: React.FC<SummaryBarProps> = ({ total, itemCount, active
   return (
     <div className="sticky top-0 z-50 bg-white border-b-4 border-slate-200 shadow-md transition-all duration-300">
       <div className="container mx-auto px-4 py-3">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          {/* Left Side: Stats */}
-          <div className="flex items-center space-x-4">
+        <div className="flex flex-col gap-4">
+          {/* Stats Row */}
+          <div className="flex items-center justify-between gap-4">
             <div className="flex items-center text-slate-800">
               <ShoppingBag size={24} className="mr-2 text-blue-600" />
               <div className="flex flex-col">
@@ -34,13 +34,13 @@ export const SummaryBar: React.FC<SummaryBarProps> = ({ total, itemCount, active
             </div>
           </div>
 
-          {/* Right Side: Total (The "Calculator" result) */}
-          <div className="flex items-center bg-green-600 text-white px-6 py-3 rounded-2xl shadow-lg border-4 border-green-700">
-            <Calculator size={28} className="mr-3 text-yellow-300" />
-            <div className="flex flex-col items-end">
-              <span className="text-xs uppercase font-black tracking-widest text-green-100">Total Estimado</span>
-              <span className="text-3xl font-black tracking-tighter">{formatCurrency(total)}</span>
+          {/* Total Card (Full Width) */}
+          <div className="flex items-center justify-between bg-green-600 text-white px-6 py-4 rounded-2xl shadow-lg border-4 border-green-700 w-full">
+            <div className="flex items-center">
+                <Calculator size={32} className="mr-3 text-yellow-300" />
+                <span className="text-sm uppercase font-black tracking-widest text-green-100">Total Estimado</span>
             </div>
+            <span className="text-4xl font-black tracking-tighter">{formatCurrency(total)}</span>
           </div>
         </div>
       </div>

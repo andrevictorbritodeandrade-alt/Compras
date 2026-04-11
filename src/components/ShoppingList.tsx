@@ -177,16 +177,34 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ categories, onItemCh
                     {categoryInfo}
                 </div>
                 <div className="bg-white">
-                    {category.items.filter(i => i.active !== false).map(item => (
-                    <ShoppingItemRow 
-                        key={item.id} 
-                        item={item} 
-                        onItemChange={onItemChange}
-                        onDeleteItem={onDeleteItem}
-                        estimation={estimations.get(item.name.toLowerCase())}
-                        bestDeal={bestDeals.get(item.name.toLowerCase())}
-                    />
-                    ))}
+                    {(() => {
+                        const items = category.items.filter(i => i.active !== false);
+                        const markets = ['Atacadão', 'Supermarket', 'Dom Atacadista', 'Guanabara', ''];
+                        return markets.map(market => {
+                            const marketItems = items.filter(i => (i.market || '') === market);
+                            if (marketItems.length === 0) return null;
+                            return (
+                                <div key={market}>
+                                    {market && (
+                                        <div className="bg-slate-100 px-4 py-2 font-black text-slate-800 uppercase text-sm border-b-2 border-slate-300 flex items-center gap-2">
+                                            <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                                            {market}
+                                        </div>
+                                    )}
+                                    {marketItems.map(item => (
+                                        <ShoppingItemRow 
+                                            key={item.id} 
+                                            item={item} 
+                                            onItemChange={onItemChange}
+                                            onDeleteItem={onDeleteItem}
+                                            estimation={estimations.get(item.name.toLowerCase())}
+                                            bestDeal={bestDeals.get(item.name.toLowerCase())}
+                                        />
+                                    ))}
+                                </div>
+                            );
+                        });
+                    })()}
                 </div>
                 </div>
             );

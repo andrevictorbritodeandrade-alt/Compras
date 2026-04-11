@@ -70,6 +70,18 @@ export const ShoppingItemRow: React.FC<ShoppingItemRowProps> = ({
           className="w-full bg-transparent border-none focus:ring-0 p-0 text-lg md:text-xl font-black text-slate-900 uppercase"
           disabled={!isActive}
         />
+        <select
+          value={item.market || ''}
+          onChange={(e) => onItemChange(item.id, 'market', e.target.value)}
+          className="w-full text-xs bg-slate-100 rounded p-1 mt-1 font-bold text-slate-600"
+          disabled={!isActive}
+        >
+          <option value="">Local de compra</option>
+          <option value="Atacadão">Atacadão</option>
+          <option value="Supermarket">Supermarket</option>
+          <option value="Dom Atacadista">Dom Atacadista</option>
+          <option value="Guanabara">Guanabara</option>
+        </select>
         {bestDeal && isActive && (
           <div className="flex flex-col mt-1">
             <div className="flex items-center text-xs md:text-sm text-green-600 font-black animate-pulse uppercase">

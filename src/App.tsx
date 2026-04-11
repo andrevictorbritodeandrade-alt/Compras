@@ -16,16 +16,6 @@ import { AIAssistant } from './components/AIAssistant';
 import { ShoppingCart, Tag, ListTodo, History } from 'lucide-react';
 import { INITIAL_DEALS } from './data/initialDeals';
 
-// Define a type for the BeforeInstallPromptEvent
-interface BeforeInstallPromptEvent extends Event {
-  readonly platforms: string[];
-  readonly userChoice: Promise<{
-    outcome: 'accepted' | 'dismissed';
-    platform: string;
-  }>;
-  prompt(): Promise<void>;
-}
-
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 const App: React.FC = () => {
@@ -34,7 +24,6 @@ const App: React.FC = () => {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [history, setHistory] = useState<MonthlyHistoryType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [installPromptEvent, setInstallPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [isAddItemFormVisible, setIsAddItemFormVisible] = useState(false);
   const [activeTab, setActiveTab] = useState<'list' | 'pre-list' | 'encartes' | 'history'>('list');
 
@@ -122,35 +111,6 @@ const App: React.FC = () => {
     };
     fetchHistory();
   }, [currentShoppingList]);
-
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setInstallPromptEvent(e as BeforeInstallPromptEvent);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    };
-  }, []);
-
-  const handleInstallClick = () => {
-    if (installPromptEvent) {
-      installPromptEvent.prompt();
-      installPromptEvent.userChoice.then(choiceResult => {
-        if (choiceResult.outcome === 'accepted') {
-          console.log('User accepted the install prompt');
-        } else {
-          console.log('User dismissed the install prompt');
-        }
-        setInstallPromptEvent(null);
-      });
-    } else {
-      alert('A instalação do aplicativo não está disponível neste navegador ou o aplicativo já foi instalado.');
-    }
-  };
 
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
@@ -629,15 +589,6 @@ const App: React.FC = () => {
                 <p className="text-red-100 mt-2 text-sm md:text-base font-bold tracking-wide">SEU ASSISTENTE PESSOAL DE ORÇAMENTO</p>
             </div>
             <div className="flex gap-4 mt-6">
-                 <button
-                    onClick={handleInstallClick}
-                    className="inline-flex items-center px-6 py-3 border-4 border-transparent text-sm md:text-base font-black rounded-full shadow-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-blue-500 transition-transform active:scale-95 uppercase"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    INSTALAR APP
-                  </button>
                 <button
                     onClick={() => setIsAIAssistantOpen(true)}
                     disabled={!isOnline}

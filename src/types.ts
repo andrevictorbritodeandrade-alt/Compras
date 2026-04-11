@@ -6,6 +6,7 @@ export interface ShoppingItem {
   unit?: string;
   active?: boolean;
   checked?: boolean;
+  market?: string;
 }
 
 export interface Category {
