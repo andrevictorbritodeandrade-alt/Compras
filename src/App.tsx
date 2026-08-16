@@ -21,12 +21,28 @@ const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
 const App: React.FC = () => {
   const [activeMonth, setActiveMonth] = useState<string>(() => {
     const savedMonth = localStorage.getItem('activeMonth');
-    return savedMonth || MONTHS[new Date().getMonth()];
+    return savedMonth || 'August';
+  });
+
+  const [paymentMethod, setPaymentMethod] = useState<string>(() => {
+    return localStorage.getItem('paymentMethod') || 'Cartão do Iago';
+  });
+
+  const [dueDate, setDueDate] = useState<string>(() => {
+    return localStorage.getItem('dueDate') || '07 de Setembro';
   });
 
   useEffect(() => {
     localStorage.setItem('activeMonth', activeMonth);
   }, [activeMonth]);
+
+  useEffect(() => {
+    localStorage.setItem('paymentMethod', paymentMethod);
+  }, [paymentMethod]);
+
+  useEffect(() => {
+    localStorage.setItem('dueDate', dueDate);
+  }, [dueDate]);
   const [currentShoppingList, setCurrentShoppingList] = useState<Category[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [history, setHistory] = useState<MonthlyHistoryType[]>([]);
@@ -586,13 +602,15 @@ const App: React.FC = () => {
   }, [deals]);
 
   const handleFinalizePurchase = useCallback(async () => {
-    if (!window.confirm("Deseja registrar esta compra no histórico de hoje?")) return;
+    if (!window.confirm(`Deseja registrar esta compra no histórico de hoje (16 de Agosto)?\nForma de Pagamento: ${paymentMethod}\nVencimento: ${dueDate}\nTotal: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalCost)}`)) return;
     const docRef = doc(db, 'shoppingLists', activeMonth);
     const newPurchase = {
       id: Date.now(),
       date: new Date().toISOString(),
       total: totalCost,
-      itemCount: activeItemCount
+      itemCount: activeItemCount,
+      paymentMethod,
+      dueDate
     };
     
     // Update purchases history
@@ -614,8 +632,13 @@ const App: React.FC = () => {
       setMasterList(prev => [...new Set([...prev, ...checkedItems.map(i => i.toLowerCase())])]);
     }
 
-    alert("Compra finalizada e registrada com sucesso!");
-  }, [activeMonth, totalCost, activeItemCount, currentShoppingList]);
+    alert(`Compra de ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(totalCost)} registrada no ${paymentMethod} com sucesso! Vencimento: ${dueDate}.`);
+  }, [activeMonth, totalCost, activeItemCount, currentShoppingList, paymentMethod, dueDate]);
+
+  const handleUpdatePaymentInfo = useCallback((newPaymentMethod: string, newDueDate: string) => {
+    setPaymentMethod(newPaymentMethod);
+    setDueDate(newDueDate);
+  }, []);
 
   return (
     <div className="min-h-screen font-sans bg-white text-slate-900">
@@ -660,6 +683,9 @@ const App: React.FC = () => {
             total={totalCost} 
             itemCount={itemCount} 
             activeItemCount={activeItemCount} 
+            paymentMethod={paymentMethod}
+            dueDate={dueDate}
+            onUpdatePaymentInfo={handleUpdatePaymentInfo}
           />
           <div className="container mx-auto px-4 mt-4 mb-2 flex justify-center">
             <button

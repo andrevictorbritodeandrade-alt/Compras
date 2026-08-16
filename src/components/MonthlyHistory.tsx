@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, Calendar, DollarSign, ArrowRight, ShoppingBag } from 'lucide-react';
+import { TrendingUp, Calendar, DollarSign, ArrowRight, ShoppingBag, CreditCard, CalendarCheck } from 'lucide-react';
 import { MonthlyHistory as MonthlyHistoryType, Purchase } from '../types';
 
 interface MonthlyHistoryProps {
@@ -63,7 +63,21 @@ export const MonthlyHistory: React.FC<MonthlyHistoryProps> = ({ history, purchas
                     <p className="font-black text-slate-900 uppercase">
                       {new Date(purchase.date).toLocaleDateString('pt-BR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                     </p>
-                    <p className="text-sm font-bold text-slate-500">{purchase.itemCount} itens comprados</p>
+                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                      <span className="text-xs font-bold text-slate-500">{purchase.itemCount} itens comprados</span>
+                      {purchase.paymentMethod && (
+                        <span className="inline-flex items-center gap-1 text-xs font-black bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full">
+                          <CreditCard size={12} />
+                          {purchase.paymentMethod}
+                        </span>
+                      )}
+                      {purchase.dueDate && (
+                        <span className="inline-flex items-center gap-1 text-xs font-black bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full">
+                          <CalendarCheck size={12} />
+                          Pagar em {purchase.dueDate}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">

@@ -46,4 +46,6 @@ export interface Purchase {
   date: string;
   total: number;
   itemCount: number;
+  paymentMethod?: string;
+  dueDate?: string;
 }
