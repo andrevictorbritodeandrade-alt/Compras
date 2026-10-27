@@ -192,14 +192,14 @@ export const PreShoppingList: React.FC<PreShoppingListProps> = ({ onSyncAIList, 
                 placeholder="Buscar ou adicionar item..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border-2 border-slate-300 rounded-full focus:ring-4 focus:ring-blue-500 focus:border-blue-500 font-bold"
+                className="w-full pl-10 pr-4 py-3 border-2 border-slate-300 rounded-full focus:ring-4 focus:ring-red-500 focus:border-red-500 font-bold"
                 />
                 <Search className="absolute left-3 top-3.5 text-slate-400" size={20} />
             </div>
             {searchTerm && !allItems.some(i => i.toLowerCase() === searchTerm.toLowerCase()) && (
                 <button
                     onClick={handleAddNewItem}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-full font-black uppercase text-xs hover:bg-blue-700 transition-transform active:scale-95 flex items-center gap-1"
+                    className="bg-red-600 text-white px-4 py-2 rounded-full font-black uppercase text-xs hover:bg-red-700 transition-transform active:scale-95 flex items-center gap-1"
                 >
                     <Plus size={16} />
                     Add
@@ -224,12 +224,12 @@ export const PreShoppingList: React.FC<PreShoppingListProps> = ({ onSyncAIList, 
                 onClick={() => setSelectedMarket(market)}
                 className={`px-4 py-3 rounded-full font-black text-xs md:text-sm uppercase transition-all flex items-center gap-2 ${
                   selectedMarket === market 
-                  ? 'bg-blue-600 text-white shadow-md scale-105' 
+                  ? 'bg-red-600 text-white shadow-md scale-105' 
                   : 'bg-white text-slate-600 hover:bg-slate-50 border-2 border-slate-200'
                 }`}
               >
                 {market}
-                <span className={`px-2 py-1 rounded-full text-xs ${selectedMarket === market ? 'bg-blue-500 text-white' : 'bg-slate-200 text-slate-600'}`}>
+                <span className={`px-2 py-1 rounded-full text-xs ${selectedMarket === market ? 'bg-red-500 text-white' : 'bg-slate-200 text-slate-600'}`}>
                   {getMarketCount(market)}
                 </span>
               </button>
@@ -264,7 +264,7 @@ export const PreShoppingList: React.FC<PreShoppingListProps> = ({ onSyncAIList, 
                     <td className="p-4 text-center border-r-2 border-slate-100">
                       <button 
                         onClick={() => handleToggleItem(item)}
-                        className={`p-2 rounded-full transition-colors ${isActive ? 'text-blue-600 hover:bg-blue-100' : 'text-slate-400 hover:bg-slate-200'}`}
+                        className={`p-2 rounded-full transition-colors ${isActive ? 'text-red-600 hover:bg-red-100' : 'text-slate-400 hover:bg-slate-200'}`}
                         title={isActive ? "Desligar (Não comprar agora)" : "Ligar (Comprar agora)"}
                       >
                         {isActive ? <Power size={24} /> : <PowerOff size={24} />}
@@ -281,51 +281,51 @@ export const PreShoppingList: React.FC<PreShoppingListProps> = ({ onSyncAIList, 
                           <span className="font-black w-6 text-center text-base md:text-lg">{itemInList.quantity || 1}</span>
                           <button 
                             onClick={(e) => { e.stopPropagation(); onItemChange(itemInList.id, 'quantity', (itemInList.quantity || 1) + 1); }}
-                            className="p-1 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-700"
+                            className="p-1 rounded-full bg-red-100 hover:bg-red-200 text-red-700"
                           >+</button>
                         </div>
                       ) : (
                         <span className="text-slate-400 font-bold">-</span>
                       )}
                     </td>
-                    <td className={`p-2 text-center border-r-2 border-slate-100 ${selectedMarket === 'Atacadão' ? 'bg-blue-50/50' : ''}`}>
+                    <td className={`p-2 text-center border-r-2 border-slate-100 ${selectedMarket === 'Atacadão' ? 'bg-red-50/50' : ''}`}>
                       <input 
                         type="number"
                         step="0.01"
                         value={prices['Atacadão'] || ''}
                         placeholder="—"
                         onChange={(e) => handlePriceChange(item, 'Atacadão', e.target.value ? parseFloat(e.target.value) : null)}
-                        className={`w-full text-center p-1 rounded font-bold text-base bg-transparent border-none focus:ring-2 focus:ring-blue-500 ${getPriceColorClass(item, 'Atacadão')}`}
+                        className={`w-full text-center p-1 rounded font-bold text-base bg-transparent border-none focus:ring-2 focus:ring-red-500 ${getPriceColorClass(item, 'Atacadão')}`}
                       />
                     </td>
-                    <td className={`p-2 text-center border-r-2 border-slate-100 ${selectedMarket === 'Supermarket' ? 'bg-blue-50/50' : ''}`}>
+                    <td className={`p-2 text-center border-r-2 border-slate-100 ${selectedMarket === 'Supermarket' ? 'bg-red-50/50' : ''}`}>
                       <input 
                         type="number"
                         step="0.01"
                         value={prices['Supermarket'] || ''}
                         placeholder="—"
                         onChange={(e) => handlePriceChange(item, 'Supermarket', e.target.value ? parseFloat(e.target.value) : null)}
-                        className={`w-full text-center p-1 rounded font-bold text-base bg-transparent border-none focus:ring-2 focus:ring-blue-500 ${getPriceColorClass(item, 'Supermarket')}`}
+                        className={`w-full text-center p-1 rounded font-bold text-base bg-transparent border-none focus:ring-2 focus:ring-red-500 ${getPriceColorClass(item, 'Supermarket')}`}
                       />
                     </td>
-                    <td className={`p-2 text-center border-r-2 border-slate-100 ${selectedMarket === 'Dom Atacadista' ? 'bg-blue-50/50' : ''}`}>
+                    <td className={`p-2 text-center border-r-2 border-slate-100 ${selectedMarket === 'Dom Atacadista' ? 'bg-red-50/50' : ''}`}>
                       <input 
                         type="number"
                         step="0.01"
                         value={prices['Dom Atacadista'] || ''}
                         placeholder="—"
                         onChange={(e) => handlePriceChange(item, 'Dom Atacadista', e.target.value ? parseFloat(e.target.value) : null)}
-                        className={`w-full text-center p-1 rounded font-bold text-base bg-transparent border-none focus:ring-2 focus:ring-blue-500 ${getPriceColorClass(item, 'Dom Atacadista')}`}
+                        className={`w-full text-center p-1 rounded font-bold text-base bg-transparent border-none focus:ring-2 focus:ring-red-500 ${getPriceColorClass(item, 'Dom Atacadista')}`}
                       />
                     </td>
-                    <td className={`p-2 text-center ${selectedMarket === 'Guanabara' ? 'bg-blue-50/50' : ''}`}>
+                    <td className={`p-2 text-center ${selectedMarket === 'Guanabara' ? 'bg-red-50/50' : ''}`}>
                       <input 
                         type="number"
                         step="0.01"
                         value={prices['Guanabara'] || ''}
                         placeholder="—"
                         onChange={(e) => handlePriceChange(item, 'Guanabara', e.target.value ? parseFloat(e.target.value) : null)}
-                        className={`w-full text-center p-1 rounded font-bold text-base bg-transparent border-none focus:ring-2 focus:ring-blue-500 ${getPriceColorClass(item, 'Guanabara')}`}
+                        className={`w-full text-center p-1 rounded font-bold text-base bg-transparent border-none focus:ring-2 focus:ring-red-500 ${getPriceColorClass(item, 'Guanabara')}`}
                       />
                     </td>
                   </tr>
@@ -350,7 +350,7 @@ export const PreShoppingList: React.FC<PreShoppingListProps> = ({ onSyncAIList, 
                   </div>
                   <button 
                     onClick={() => handleToggleItem(item)}
-                    className={`p-2 rounded-full transition-colors flex-shrink-0 ${isActive ? 'text-blue-600 bg-blue-50' : 'text-slate-400 bg-slate-100'}`}
+                    className={`p-2 rounded-full transition-colors flex-shrink-0 ${isActive ? 'text-red-600 bg-red-50' : 'text-slate-400 bg-slate-100'}`}
                   >
                     {isActive ? <Power size={20} /> : <PowerOff size={20} />}
                   </button>
@@ -367,7 +367,7 @@ export const PreShoppingList: React.FC<PreShoppingListProps> = ({ onSyncAIList, 
                       <span className="font-black text-xl">{itemInList.quantity || 1}</span>
                       <button 
                         onClick={() => onItemChange(itemInList.id, 'quantity', (itemInList.quantity || 1) + 1)}
-                        className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 text-blue-700 font-black text-xl"
+                        className="w-10 h-10 flex items-center justify-center rounded-full bg-red-100 text-red-700 font-black text-xl"
                       >+</button>
                     </div>
                   ) : (
@@ -376,7 +376,7 @@ export const PreShoppingList: React.FC<PreShoppingListProps> = ({ onSyncAIList, 
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className={`text-center space-y-1 p-2 rounded-lg ${selectedMarket === 'Atacadão' ? 'bg-blue-50 border-2 border-blue-200' : 'bg-slate-50 border-2 border-slate-100'}`}>
+                  <div className={`text-center space-y-1 p-2 rounded-lg ${selectedMarket === 'Atacadão' ? 'bg-red-50 border-2 border-red-200' : 'bg-slate-50 border-2 border-slate-100'}`}>
                     <span className="block text-sm font-black text-slate-400 uppercase">Atacadão</span>
                     <input 
                         type="number"
@@ -384,10 +384,10 @@ export const PreShoppingList: React.FC<PreShoppingListProps> = ({ onSyncAIList, 
                         value={prices['Atacadão'] || ''}
                         placeholder="—"
                         onChange={(e) => handlePriceChange(item, 'Atacadão', e.target.value ? parseFloat(e.target.value) : null)}
-                        className={`w-full text-center p-2 rounded font-bold text-base bg-white border-2 border-slate-200 focus:ring-2 focus:ring-blue-500 ${getPriceColorClass(item, 'Atacadão')}`}
+                        className={`w-full text-center p-2 rounded font-bold text-base bg-white border-2 border-slate-200 focus:ring-2 focus:ring-red-500 ${getPriceColorClass(item, 'Atacadão')}`}
                     />
                   </div>
-                  <div className={`text-center space-y-1 p-2 rounded-lg ${selectedMarket === 'Supermarket' ? 'bg-blue-50 border-2 border-blue-200' : 'bg-slate-50 border-2 border-slate-100'}`}>
+                  <div className={`text-center space-y-1 p-2 rounded-lg ${selectedMarket === 'Supermarket' ? 'bg-red-50 border-2 border-red-200' : 'bg-slate-50 border-2 border-slate-100'}`}>
                     <span className="block text-sm font-black text-slate-400 uppercase">Supermarket</span>
                     <input 
                         type="number"
@@ -395,10 +395,10 @@ export const PreShoppingList: React.FC<PreShoppingListProps> = ({ onSyncAIList, 
                         value={prices['Supermarket'] || ''}
                         placeholder="—"
                         onChange={(e) => handlePriceChange(item, 'Supermarket', e.target.value ? parseFloat(e.target.value) : null)}
-                        className={`w-full text-center p-2 rounded font-bold text-base bg-white border-2 border-slate-200 focus:ring-2 focus:ring-blue-500 ${getPriceColorClass(item, 'Supermarket')}`}
+                        className={`w-full text-center p-2 rounded font-bold text-base bg-white border-2 border-slate-200 focus:ring-2 focus:ring-red-500 ${getPriceColorClass(item, 'Supermarket')}`}
                     />
                   </div>
-                  <div className={`text-center space-y-1 p-2 rounded-lg ${selectedMarket === 'Dom Atacadista' ? 'bg-blue-50 border-2 border-blue-200' : 'bg-slate-50 border-2 border-slate-100'}`}>
+                  <div className={`text-center space-y-1 p-2 rounded-lg ${selectedMarket === 'Dom Atacadista' ? 'bg-red-50 border-2 border-red-200' : 'bg-slate-50 border-2 border-slate-100'}`}>
                     <span className="block text-sm font-black text-slate-400 uppercase">Dom Atacadista</span>
                     <input 
                         type="number"
@@ -406,10 +406,10 @@ export const PreShoppingList: React.FC<PreShoppingListProps> = ({ onSyncAIList, 
                         value={prices['Dom Atacadista'] || ''}
                         placeholder="—"
                         onChange={(e) => handlePriceChange(item, 'Dom Atacadista', e.target.value ? parseFloat(e.target.value) : null)}
-                        className={`w-full text-center p-2 rounded font-bold text-base bg-white border-2 border-slate-200 focus:ring-2 focus:ring-blue-500 ${getPriceColorClass(item, 'Dom Atacadista')}`}
+                        className={`w-full text-center p-2 rounded font-bold text-base bg-white border-2 border-slate-200 focus:ring-2 focus:ring-red-500 ${getPriceColorClass(item, 'Dom Atacadista')}`}
                     />
                   </div>
-                  <div className={`text-center space-y-1 p-2 rounded-lg ${selectedMarket === 'Guanabara' ? 'bg-blue-50 border-2 border-blue-200' : 'bg-slate-50 border-2 border-slate-100'}`}>
+                  <div className={`text-center space-y-1 p-2 rounded-lg ${selectedMarket === 'Guanabara' ? 'bg-red-50 border-2 border-red-200' : 'bg-slate-50 border-2 border-slate-100'}`}>
                     <span className="block text-sm font-black text-slate-400 uppercase">Guanabara</span>
                     <input 
                         type="number"
@@ -417,7 +417,7 @@ export const PreShoppingList: React.FC<PreShoppingListProps> = ({ onSyncAIList, 
                         value={prices['Guanabara'] || ''}
                         placeholder="—"
                         onChange={(e) => handlePriceChange(item, 'Guanabara', e.target.value ? parseFloat(e.target.value) : null)}
-                        className={`w-full text-center p-2 rounded font-bold text-base bg-white border-2 border-slate-200 focus:ring-2 focus:ring-blue-500 ${getPriceColorClass(item, 'Guanabara')}`}
+                        className={`w-full text-center p-2 rounded font-bold text-base bg-white border-2 border-slate-200 focus:ring-2 focus:ring-red-500 ${getPriceColorClass(item, 'Guanabara')}`}
                     />
                   </div>
                 </div>

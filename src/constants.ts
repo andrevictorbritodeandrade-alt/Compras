@@ -7,6 +7,7 @@ const createItem = (name: string, quantity: number, price: number) => ({
     name,
     quantity,
     price,
+    active: true,
 });
 
 const categoriesData: Category[] = [

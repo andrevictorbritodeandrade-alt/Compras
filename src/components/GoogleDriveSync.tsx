@@ -136,12 +136,12 @@ export const GoogleDriveSync: React.FC<GoogleDriveSyncProps> = ({ currentData, a
     <div className="bg-slate-50 border-2 border-slate-200 rounded-2xl p-4 my-4 shadow-sm">
       <div className="flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="p-3 bg-blue-100 text-blue-600 rounded-xl relative">
+          <div className="p-3 bg-red-100 text-red-600 rounded-xl relative">
             <HardDrive size={28} />
             {isSyncing && (
               <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
               </span>
             )}
           </div>
@@ -151,7 +151,7 @@ export const GoogleDriveSync: React.FC<GoogleDriveSyncProps> = ({ currentData, a
               <span className="text-xs bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full">Ativo 24h</span>
             </h3>
             <p className="text-sm text-slate-600">
-              Conta: <span className="font-bold text-blue-700">andrevictorbritodeandrade@gmail.com</span>
+              Conta: <span className="font-bold text-red-700">andrevictorbritodeandrade@gmail.com</span>
             </p>
           </div>
         </div>
@@ -177,7 +177,7 @@ export const GoogleDriveSync: React.FC<GoogleDriveSyncProps> = ({ currentData, a
       </div>
 
       {syncStatus && (
-        <div className="mt-3 text-xs md:text-sm font-bold text-blue-700 bg-blue-50 border border-blue-200 p-2 rounded-lg flex items-center gap-2">
+        <div className="mt-3 text-xs md:text-sm font-bold text-red-700 bg-red-50 border border-red-200 p-2 rounded-lg flex items-center gap-2">
           <CheckCircle2 size={16} />
           {syncStatus}
         </div>
@@ -187,7 +187,7 @@ export const GoogleDriveSync: React.FC<GoogleDriveSyncProps> = ({ currentData, a
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 max-w-lg w-full shadow-2xl border-4 border-slate-100 max-h-[80vh] overflow-y-auto">
             <h3 className="text-xl font-black text-slate-900 mb-4 flex items-center gap-2">
-              <HardDrive className="text-blue-600" /> Backups no Google Drive (andrevictorbritodeandrade@gmail.com)
+              <HardDrive className="text-red-600" /> Backups no Google Drive (andrevictorbritodeandrade@gmail.com)
             </h3>
             {backups.length === 0 ? (
               <p className="text-slate-500 py-6 text-center font-medium">Nenhum backup encontrado no Google Drive.</p>

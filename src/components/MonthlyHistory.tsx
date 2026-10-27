@@ -23,7 +23,7 @@ export const MonthlyHistory: React.FC<MonthlyHistoryProps> = ({ history, purchas
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded-3xl shadow-sm border-2 border-slate-200 flex items-center gap-4">
-          <div className="bg-blue-100 p-4 rounded-2xl text-blue-600">
+          <div className="bg-red-100 p-4 rounded-2xl text-red-600">
             <TrendingUp size={32} />
           </div>
           <div>
@@ -66,7 +66,7 @@ export const MonthlyHistory: React.FC<MonthlyHistoryProps> = ({ history, purchas
                     <div className="flex flex-wrap items-center gap-2 mt-1">
                       <span className="text-xs font-bold text-slate-500">{purchase.itemCount} itens comprados</span>
                       {purchase.paymentMethod && (
-                        <span className="inline-flex items-center gap-1 text-xs font-black bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-xs font-black bg-red-100 text-red-800 px-2.5 py-0.5 rounded-full">
                           <CreditCard size={12} />
                           {purchase.paymentMethod}
                         </span>
@@ -94,7 +94,7 @@ export const MonthlyHistory: React.FC<MonthlyHistoryProps> = ({ history, purchas
       <div className="bg-white rounded-3xl shadow-sm border-2 border-slate-200 overflow-hidden">
         <div className="p-6 border-b-2 border-slate-100 flex items-center justify-between bg-slate-50">
           <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Histórico de Gastos (Geral)</h3>
-          <DollarSign className="text-blue-600" size={24} />
+          <DollarSign className="text-red-600" size={24} />
         </div>
         
         <div className="divide-y-2 divide-slate-100">

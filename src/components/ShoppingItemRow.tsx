@@ -58,81 +58,33 @@ export const ShoppingItemRow: React.FC<ShoppingItemRowProps> = ({
   };
 
   return (
-    <div ref={rowRef} className={`grid grid-cols-12 gap-2 px-2 md:px-4 py-4 items-center border-b-2 border-slate-100 last:border-b-0 text-sm transition-all relative ${!isActive ? 'opacity-40 grayscale bg-slate-50' : ''} ${isChecked ? 'bg-green-50/50' : 'hover:bg-slate-50'}`}>
+    <div ref={rowRef} className={`grid grid-cols-12 gap-1 px-1 md:px-4 py-2 items-center border-b-2 border-slate-100 last:border-b-0 text-xs transition-all relative ${!isActive ? 'opacity-40 grayscale bg-slate-50' : ''} ${isChecked ? 'bg-green-50/50' : 'hover:bg-slate-50'}`}>
       
-      {/* Toggle Active/Inactive (Ligar/Desligar) */}
+      {/* Toggle Active/Inactive */}
       <div className="col-span-1 flex justify-center">
         <button 
           onClick={() => onItemChange(item.id, 'active', !isActive)}
-          className={`p-2 rounded-full transition-colors ${isActive ? 'text-blue-600 hover:bg-blue-100' : 'text-slate-400 hover:bg-slate-200'}`}
-          title={isActive ? "Desligar (Não comprar agora)" : "Ligar (Comprar agora)"}
+          className={`p-1.5 rounded-full transition-colors ${isActive ? 'bg-red-600 text-white' : 'bg-slate-300 text-slate-700'}`}
+          title={isActive ? "Desligar" : "Ligar"}
         >
-          {isActive ? <Power size={20} /> : <PowerOff size={20} />}
+          <Power size={14} />
         </button>
       </div>
 
-      {/* Checkbox (only if active) */}
-      <div className="col-span-1 flex justify-center">
-        {isActive && (
-          <button 
-            onClick={() => onItemChange(item.id, 'checked', !isChecked)}
-            className={`transition-colors ${isChecked ? 'text-green-600' : 'text-slate-300 hover:text-green-500'}`}
-          >
-            {isChecked ? <CheckCircle2 size={24} /> : <Circle size={24} />}
-          </button>
-        )}
-      </div>
-
-      {/* Product Name and Category */}
-      <div className={`col-span-3 md:col-span-3 font-black text-slate-900 truncate ${isChecked ? 'line-through text-slate-400' : ''}`}>
+      {/* Product Name (compacted) */}
+      <div className={`col-span-3 font-black text-slate-900 truncate ${isChecked ? 'line-through text-slate-400' : ''}`}>
         <input
           type="text"
           value={localItem.name}
           onChange={(e) => setLocalItem({...localItem, name: e.target.value})}
           onBlur={() => handleBlur('name', localItem.name)}
-          className="w-full bg-transparent border-none focus:ring-0 p-0 text-lg md:text-xl font-black text-slate-900 uppercase"
+          className="w-full bg-transparent border-none focus:ring-0 p-0 text-xs font-black text-slate-900 uppercase"
           disabled={!isActive}
         />
-        <select
-          value={localCategory}
-          onChange={(e) => onCategoryChange(item.id, e.target.value)}
-          className="w-full text-xs bg-slate-100 rounded p-1 mt-1 font-bold text-slate-600"
-          disabled={!isActive}
-        >
-          {categories.map(cat => (
-            <option key={cat.id} value={cat.name}>{cat.name}</option>
-          ))}
-        </select>
-        <select
-          value={localItem.market || ''}
-          onChange={(e) => {
-            setLocalItem({...localItem, market: e.target.value});
-            onItemChange(item.id, 'market', e.target.value);
-          }}
-          className="w-full text-xs bg-slate-100 rounded p-1 mt-1 font-bold text-slate-600"
-          disabled={!isActive}
-        >
-          <option value="">Local de compra</option>
-          <option value="Atacadão">Atacadão</option>
-          <option value="Supermarket">Supermarket</option>
-          <option value="Dom Atacadista">Dom Atacadista</option>
-          <option value="Guanabara">Guanabara</option>
-        </select>
-        {bestDeal && isActive && (
-          <div className="flex flex-col mt-1">
-            <div className="flex items-center text-xs md:text-sm text-green-600 font-black animate-pulse uppercase">
-                <TrendingDown size={14} className="mr-1" />
-                Melhor Preço: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(bestDeal.price)}
-            </div>
-            <div className="text-xs md:text-sm text-blue-600 font-black uppercase tracking-tighter">
-                Loja: {bestDeal.market}
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Current Quantity Stepper */}
-      <div className="col-span-2 md:col-span-2 flex items-center justify-center gap-1">
+      {/* Current Quantity Stepper (compacted) */}
+      <div className="col-span-2 flex items-center justify-center gap-0.5">
         <button
           onClick={() => {
             const newQty = Math.max(0, localItem.quantity - 1);
@@ -140,12 +92,12 @@ export const ShoppingItemRow: React.FC<ShoppingItemRowProps> = ({
             onItemChange(item.id, 'quantity', newQty);
           }}
           disabled={!isActive}
-          className="w-7 h-7 bg-slate-200 hover:bg-slate-300 disabled:opacity-50 text-slate-800 font-black rounded-lg flex items-center justify-center text-sm transition-transform active:scale-95 shadow-sm"
+          className="w-6 h-6 bg-slate-200 hover:bg-slate-300 disabled:opacity-50 text-slate-800 font-black rounded flex items-center justify-center text-xs transition-transform active:scale-95"
           title="Diminuir"
         >
           -
         </button>
-        <span className="w-8 text-center font-black text-base md:text-lg text-slate-900">
+        <span className="w-5 text-center font-black text-xs text-slate-900">
           {localItem.quantity}
         </span>
         <button
@@ -155,45 +107,38 @@ export const ShoppingItemRow: React.FC<ShoppingItemRowProps> = ({
             onItemChange(item.id, 'quantity', newQty);
           }}
           disabled={!isActive}
-          className="w-7 h-7 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-black rounded-lg flex items-center justify-center text-sm transition-transform active:scale-95 shadow-sm"
+          className="w-6 h-6 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-black rounded flex items-center justify-center text-xs transition-transform active:scale-95"
           title="Aumentar"
         >
           +
         </button>
       </div>
 
-      {/* Estimated Quantity */}
-      <div className="col-span-1 text-center text-slate-500 text-sm md:text-base font-bold hidden md:block">
-        {estimation ? (
-          <span>{estimation.quantity} {estimation.unit}</span>
-        ) : (
-          <span className="text-slate-300">-</span>
-        )}
-      </div>
-
-      {/* Unit Price */}
-      <div className="col-span-2 text-center">
-        <div className="relative rounded-lg shadow-sm">
-          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2">
-            <span className="text-slate-500 text-sm md:text-base font-black">R$</span>
-          </div>
-          <input
-            type="number"
-            data-type="price"
-            value={localItem.price}
-            onChange={(e) => setLocalItem({...localItem, price: Number(e.target.value)})}
-            onBlur={() => handleBlur('price', localItem.price)}
-            onKeyDown={handleKeyDown}
-            className={`block w-full rounded-lg border-2 border-slate-300 pl-7 pr-2 py-1 text-base md:text-lg font-black focus:border-blue-500 focus:ring-blue-500 text-right ${bestDeal && localItem.price > bestDeal.price ? 'text-red-600' : 'text-slate-900'}`}
-            min="0"
-            step="0.01"
-            disabled={!isActive}
-          />
-        </div>
+      {/* Unit Price (compacted) */}
+      <div className="col-span-3">
+        <input
+          type="text"
+          inputMode="decimal"
+          data-type="price"
+          value={localItem.price.toString().replace('.', ',')}
+          onChange={(e) => {
+            const val = e.target.value.replace('.', ',');
+            // Only allow digits and one comma
+            if (/^\d*,?\d*$/.test(val)) {
+                // If it starts with 0 and is more than one digit (and not just "0,"), remove the leading 0
+                const sanitized = val.length > 1 && val.startsWith('0') && !val.startsWith('0,') ? val.substring(1) : val;
+                setLocalItem({...localItem, price: parseFloat(sanitized.replace(',', '.') || '0')});
+            }
+          }}
+          onBlur={() => handleBlur('price', localItem.price)}
+          onKeyDown={handleKeyDown}
+          className={`block w-full rounded border border-slate-300 px-1 py-1 text-xs font-black focus:border-red-500 focus:ring-red-500 text-right ${bestDeal && localItem.price > bestDeal.price ? 'text-red-600' : 'text-slate-900'}`}
+          disabled={!isActive}
+        />
       </div>
 
       {/* Subtotal */}
-      <div className="col-span-2 md:col-span-1 text-center font-black text-slate-900 text-base md:text-lg">
+      <div className="col-span-2 text-right font-black text-slate-900 text-xs truncate">
         {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(subtotal)}
       </div>
 
@@ -201,9 +146,9 @@ export const ShoppingItemRow: React.FC<ShoppingItemRowProps> = ({
       <div className="col-span-1 text-right">
         <button
           onClick={() => onDeleteItem(item.id)}
-          className="text-slate-400 hover:text-red-600 transition-colors p-2 rounded-full hover:bg-red-50"
+          className="text-slate-400 hover:text-red-600 transition-colors p-1 rounded-full hover:bg-red-50"
         >
-          <Trash2 size={20} />
+          <Trash2 size={14} />
         </button>
       </div>
     </div>

@@ -71,7 +71,7 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ categories, onItemCh
           <p className="mt-1 text-sm text-slate-500 font-bold">Adicione itens ou use "//" para buscar na lista padrão.</p>
           <button 
             onClick={() => setShowQuickAdd(true)}
-            className="mt-4 bg-blue-600 text-white px-6 py-2 rounded-full font-black uppercase hover:bg-blue-700 transition-transform active:scale-95"
+            className="mt-4 bg-red-600 text-white px-6 py-2 rounded-full font-black uppercase hover:bg-red-700 transition-transform active:scale-95"
           >
             Buscar na Lista Padrão (//)
           </button>
@@ -95,7 +95,7 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ categories, onItemCh
                                 setShowQuickAdd(true);
                             }
                         }}
-                        className="w-full pl-10 pr-4 py-3 border-4 border-slate-200 rounded-xl focus:ring-4 focus:ring-blue-500 focus:border-blue-500 font-black uppercase text-sm"
+                        className="w-full pl-10 pr-4 py-3 border-4 border-slate-200 rounded-xl focus:ring-4 focus:ring-red-500 focus:border-red-500 font-black uppercase text-sm"
                     />
                     <Search className="absolute left-3 top-3.5 text-slate-400" size={20} />
                 </div>
@@ -121,10 +121,10 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ categories, onItemCh
                                 <button
                                     key={idx}
                                     onClick={() => handleQuickAdd(item)}
-                                    className="w-full text-left px-4 py-3 hover:bg-blue-50 flex items-center justify-between group transition-colors"
+                                    className="w-full text-left px-4 py-3 hover:bg-red-50 flex items-center justify-between group transition-colors"
                                 >
                                     <span className="font-black text-slate-800 uppercase text-sm">{item}</span>
-                                    <Plus size={18} className="text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    <Plus size={18} className="text-red-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                                 </button>
                             ))}
                         </div>
@@ -173,7 +173,7 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ categories, onItemCh
             return (
                 <div key={category.id} className="mb-4 border-4 border-slate-200 rounded-xl overflow-hidden shadow-sm">
                 <div className={`flex items-center p-4 bg-slate-100 border-b-4 border-slate-200`}>
-                    <CategoryIcon categoryName={category.name} className="text-blue-600" />
+                    <CategoryIcon categoryName={category.name} className="text-red-600" />
                     <h2 className={`text-2xl md:text-3xl font-black text-slate-900 uppercase tracking-tight`}>{category.name}</h2>
                     {categoryInfo}
                 </div>
@@ -188,7 +188,7 @@ export const ShoppingList: React.FC<ShoppingListProps> = ({ categories, onItemCh
                                 <div key={market}>
                                     {market && (
                                         <div className="bg-slate-100 px-4 py-2 font-black text-slate-800 uppercase text-sm border-b-2 border-slate-300 flex items-center gap-2">
-                                            <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                                            <span className="w-2 h-2 rounded-full bg-red-500"></span>
                                             {market}
                                         </div>
                                     )}

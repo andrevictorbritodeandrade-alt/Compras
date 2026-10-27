@@ -203,6 +203,7 @@ const App: React.FC = () => {
                     item.quantity = Number(isNaN(parseFloat(String(item.quantity))) ? 0 : item.quantity);
                     item.price = Number(isNaN(parseFloat(String(item.price))) ? 0 : item.price);
                 }
+                console.log(`Updating ${item.name} (${itemId}): ${field} = ${value}`);
                 itemFound = true;
                 break;
             }
@@ -456,7 +457,8 @@ const App: React.FC = () => {
           id: Date.now() + 1000 + index,
           name: itemToAdd.name,
           quantity: itemToAdd.quantity,
-          price: 0
+          price: 0,
+          active: true
         };
         category.items.push(newItem);
         category.items.sort((a: ShoppingItem, b: ShoppingItem) => a.name.localeCompare(b.name, 'pt-BR'));
@@ -651,20 +653,17 @@ const App: React.FC = () => {
         </div>
       )}
       <header className="bg-red-600 text-white uppercase font-black shadow-md">
-        <div className="container mx-auto px-4 pt-8 pb-6 flex flex-col items-center">
-            <div className="text-yellow-300 text-lg md:text-xl mb-2 tracking-wider">{currentDateFormatted}</div>
-            <h1 className="text-4xl md:text-6xl font-black tracking-tighter drop-shadow-sm">COMPRAS DO MÊS</h1>
-            <div className="flex items-center gap-4">
-                <p className="text-red-100 mt-2 text-sm md:text-base font-bold tracking-wide">SEU ASSISTENTE PESSOAL DE ORÇAMENTO</p>
-            </div>
-            <div className="flex gap-4 mt-6">
+        <div className="container mx-auto px-4 py-2 flex flex-col items-center">
+            <div className="text-yellow-300 text-sm mb-1 tracking-wider">{currentDateFormatted}</div>
+            <h1 className="text-2xl font-black tracking-tighter drop-shadow-sm">COMPRAS DO MÊS</h1>
+            <div className="flex gap-2 mt-2">
                 <button
                     onClick={() => setIsAIAssistantOpen(true)}
                     disabled={!isOnline}
-                    className={`inline-flex items-center px-6 py-3 border-4 border-transparent text-sm md:text-base font-black rounded-full shadow-lg ${!isOnline ? 'bg-slate-400 text-slate-200 cursor-not-allowed' : 'bg-yellow-500 text-black hover:bg-yellow-400'} focus:outline-none focus:ring-4 focus:ring-offset-2 focus:ring-yellow-500 transition-transform active:scale-95 uppercase`}
+                    className={`inline-flex items-center px-4 py-1.5 border-2 border-transparent text-xs font-black rounded-full shadow ${!isOnline ? 'bg-slate-400 text-slate-200 cursor-not-allowed' : 'bg-yellow-500 text-black hover:bg-yellow-400'} focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-yellow-500 transition-transform active:scale-95 uppercase`}
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
-                    {isOnline ? 'ESTIMAR COM IA' : 'IA INDISPONÍVEL'}
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                    {isOnline ? 'IA' : 'IA OFF'}
                 </button>
             </div>
         </div>
@@ -686,9 +685,6 @@ const App: React.FC = () => {
             total={totalCost} 
             itemCount={itemCount} 
             activeItemCount={activeItemCount} 
-            paymentMethod={paymentMethod}
-            dueDate={dueDate}
-            onUpdatePaymentInfo={handleUpdatePaymentInfo}
           />
           <div className="container mx-auto px-4 mt-4 mb-2 flex justify-center">
             <button
