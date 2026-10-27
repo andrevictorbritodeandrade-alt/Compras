@@ -12,23 +12,21 @@ export default defineConfig(({mode}) => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
+        includeAssets: ['icon.svg'],
         manifest: {
           name: 'Compras do Mês',
           short_name: 'Compras',
           description: 'Seu assistente pessoal de orçamento de compras',
-          theme_color: '#8b5cf6',
+          theme_color: '#dc2626',
+          background_color: '#ffffff',
+          display: 'standalone',
+          start_url: '/',
           icons: [
             {
               src: 'icon.svg',
               sizes: '512x512',
               type: 'image/svg+xml',
-              purpose: 'any'
-            },
-            {
-              src: 'icon.svg',
-              sizes: '512x512',
-              type: 'image/svg+xml',
-              purpose: 'maskable'
+              purpose: 'any maskable'
             }
           ]
         }

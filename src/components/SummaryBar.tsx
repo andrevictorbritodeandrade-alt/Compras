@@ -118,15 +118,15 @@ export const SummaryBar: React.FC<SummaryBarProps> = ({
           </div>
 
           {/* Total Card (Full Width) */}
-          <div className="flex items-center justify-between bg-green-600 text-white px-6 py-4 rounded-2xl shadow-lg border-4 border-green-700 w-full">
+          <div className="flex items-center justify-between bg-emerald-600 text-white px-8 py-6 rounded-3xl shadow-2xl border-4 border-emerald-700 w-full">
             <div className="flex items-center">
-                <Calculator size={32} className="mr-3 text-yellow-300" />
+                <Calculator size={40} className="mr-4 text-yellow-300 shrink-0" />
                 <div>
-                  <span className="text-xs uppercase font-black tracking-widest text-green-100 block">Total Estimado</span>
-                  <span className="text-[11px] font-black text-yellow-200">Fatura {currentDueDate}</span>
+                  <span className="text-sm md:text-base uppercase font-black tracking-widest text-emerald-100 block">Total Estimado da Compra</span>
+                  <span className="text-xs md:text-sm font-black text-yellow-200">Pagamento via {currentPaymentMethod} (Vencimento {currentDueDate})</span>
                 </div>
             </div>
-            <span className="text-4xl font-black tracking-tighter">{formatCurrency(total)}</span>
+            <span className="text-4xl md:text-6xl font-black tracking-tighter text-yellow-300">{formatCurrency(total)}</span>
           </div>
         </div>
       </div>

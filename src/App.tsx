@@ -15,17 +15,20 @@ import { GoogleGenAI } from '@google/genai';
 import { AIAssistant } from './components/AIAssistant';
 import { ShoppingCart, Tag, ListTodo, History } from 'lucide-react';
 import { INITIAL_DEALS } from './data/initialDeals';
+import { GoogleDriveSync } from './components/GoogleDriveSync';
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 const App: React.FC = () => {
   const [activeMonth, setActiveMonth] = useState<string>(() => {
     const savedMonth = localStorage.getItem('activeMonth');
-    return savedMonth || 'August';
+    if (savedMonth && savedMonth !== 'August') return savedMonth;
+    const currentMonthIndex = new Date().getMonth();
+    return MONTHS[currentMonthIndex];
   });
 
   const [paymentMethod, setPaymentMethod] = useState<string>(() => {
-    return localStorage.getItem('paymentMethod') || 'Cartão do Iago';
+    return localStorage.getItem('paymentMethod') || 'PIX';
   });
 
   const [dueDate, setDueDate] = useState<string>(() => {
@@ -721,7 +724,7 @@ const App: React.FC = () => {
                 }`}
             >
                 <ListTodo className="w-5 h-5 mr-2" />
-                Faltando em casa
+                Antes de Sair / Faltando em casa
             </button>
             <button
                 onClick={() => setActiveTab('encartes')}
@@ -749,6 +752,17 @@ const App: React.FC = () => {
       </div>
 
       <main className="container mx-auto p-4 pb-24">
+        <GoogleDriveSync 
+          currentData={{ categories: currentShoppingList, deals, purchases }} 
+          activeMonth={activeMonth} 
+          onRestoreData={async (data) => {
+            if (data.categories) {
+              const docRef = doc(db, 'shoppingLists', activeMonth);
+              await updateDoc(docRef, { categories: data.categories });
+              setCurrentShoppingList(data.categories);
+            }
+          }} 
+        />
         {isLoading ? (
              <div className="text-center py-10">
                 <p className="text-lg text-gray-400">Carregando...</p>

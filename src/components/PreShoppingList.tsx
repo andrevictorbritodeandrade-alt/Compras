@@ -162,7 +162,10 @@ export const PreShoppingList: React.FC<PreShoppingListProps> = ({ onSyncAIList, 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-        <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Faltando em casa</h2>
+        <div>
+          <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">Antes de Sair / Faltando em Casa</h2>
+          <p className="text-sm font-bold text-slate-500">Marque o que está faltando, ajuste quantidades e desligue o que não precisa comprar hoje.</p>
+        </div>
         <div className="flex flex-wrap justify-center gap-2 w-full md:w-auto">
           <button
             onClick={handleTurnAllOn}

@@ -99,6 +99,7 @@ const categoriesData: Category[] = [
             createItem("Pano de prato", 1, 0),
             createItem("Papel higiênico", 1, 0),
             createItem("Pasta de dente", 1, 0),
+            createItem("Escova de dente", 1, 0),
             createItem("Esponja pra pia", 1, 0),
             createItem("Esponja pra pratos", 1, 0),
             createItem("Pedra sanitária", 1, 0),
@@ -262,7 +263,7 @@ export const EXTRACTED_ITEMS = [
   "Iogurte", "Iogurte natural", "Margarina (500g)", "Peito de peru", "Queijo mussarela (kg)",
   "Aipim (Kg)", "Alface (Unidade)", "Alho (kg)", "Batata inglesa (kg)", "Cebola (kg)", "Cenoura (kg)", "Tomate (kg)",
   "Abacate (Kg)", "Banana (kg)", "Laranja (kg)", "Maçã (kg)", "Mamão (Kg)",
-  "Água sanitária (2L)", "Amaciante (5L)", "Absorvente", "Barbeador", "Coala", "Creme corporal", "Desodorante", "Detergente (500ml)", "Diabo verde", "Enxaguante bucal", "Esponja pra pratos", "Inseticida", "Pano de prato", "Papel alumínio", "Papel toalha", "Pasta de dente", "Pedra sanitária", "Perfex", "Sabão em pó", "Shampoo e condicionador", "Talco", "Veja Gold (500ml)",
+  "Água sanitária (2L)", "Amaciante (5L)", "Absorvente", "Barbeador", "Coala", "Creme corporal", "Desodorante", "Detergente (500ml)", "Diabo verde", "Enxaguante bucal", "Escova de dente", "Esponja pra pratos", "Inseticida", "Pano de prato", "Papel alumínio", "Papel toalha", "Pasta de dente", "Pedra sanitária", "Perfex", "Sabão em pó", "Shampoo e condicionador", "Talco", "Veja Gold (500ml)",
   "Açúcar (1kg)", "Adoçante", "Ajinomoto", "Biscoito salgado", "Café (500g)", "Creme de Leite", "Ervilha (Lata)", "Feijão branco (1kg)", "Fermento biológico", "Fermento em pó", "Flocão de milho", "Gelatina", "Leite de coco", "Leite em Pó", "Milho Verde", "Molho de tomate", "Óleo de soja (900ml)", "Pão de forma", "Pão integral", "Pipoca", "Queijo ralado", "Sal",
   "Suco de uva integral", "Sucos", "Tapioca", "Temperos", "Vinagre de maçã"
 ];

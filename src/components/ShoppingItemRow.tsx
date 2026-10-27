@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ShoppingItem, Category } from '../types';
 import { Trash2, TrendingDown, Power, PowerOff, CheckCircle2, Circle } from 'lucide-react';
 
@@ -23,10 +23,14 @@ export const ShoppingItemRow: React.FC<ShoppingItemRowProps> = ({
 }) => {
   const [localItem, setLocalItem] = useState(item);
   const [localCategory, setLocalCategory] = useState(categories.find(c => c.items.some(i => i.id === item.id))?.name || '');
+  const rowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setLocalItem(item);
-    setLocalCategory(categories.find(c => c.items.some(i => i.id === item.id))?.name || '');
+    const isFocusedInside = rowRef.current && rowRef.current.contains(document.activeElement);
+    if (!isFocusedInside) {
+      setLocalItem(item);
+      setLocalCategory(categories.find(c => c.items.some(i => i.id === item.id))?.name || '');
+    }
   }, [item, categories]);
 
   const subtotal = localItem.quantity * localItem.price;
@@ -54,7 +58,7 @@ export const ShoppingItemRow: React.FC<ShoppingItemRowProps> = ({
   };
 
   return (
-    <div className={`grid grid-cols-12 gap-2 px-2 md:px-4 py-4 items-center border-b-2 border-slate-100 last:border-b-0 text-sm transition-all relative ${!isActive ? 'opacity-40 grayscale bg-slate-50' : ''} ${isChecked ? 'bg-green-50/50' : 'hover:bg-slate-50'}`}>
+    <div ref={rowRef} className={`grid grid-cols-12 gap-2 px-2 md:px-4 py-4 items-center border-b-2 border-slate-100 last:border-b-0 text-sm transition-all relative ${!isActive ? 'opacity-40 grayscale bg-slate-50' : ''} ${isChecked ? 'bg-green-50/50' : 'hover:bg-slate-50'}`}>
       
       {/* Toggle Active/Inactive (Ligar/Desligar) */}
       <div className="col-span-1 flex justify-center">
@@ -127,17 +131,35 @@ export const ShoppingItemRow: React.FC<ShoppingItemRowProps> = ({
         )}
       </div>
 
-      {/* Current Quantity */}
-      <div className="col-span-1 text-center">
-        <input
-          type="number"
-          value={localItem.quantity}
-          onChange={(e) => setLocalItem({...localItem, quantity: Number(e.target.value)})}
-          onBlur={() => handleBlur('quantity', localItem.quantity)}
-          className="w-full text-center bg-slate-100 border-2 border-slate-300 rounded-lg py-1 px-1 text-base md:text-lg font-black focus:ring-blue-500 focus:border-blue-500"
-          min="0"
+      {/* Current Quantity Stepper */}
+      <div className="col-span-2 md:col-span-2 flex items-center justify-center gap-1">
+        <button
+          onClick={() => {
+            const newQty = Math.max(0, localItem.quantity - 1);
+            setLocalItem({...localItem, quantity: newQty});
+            onItemChange(item.id, 'quantity', newQty);
+          }}
           disabled={!isActive}
-        />
+          className="w-7 h-7 bg-slate-200 hover:bg-slate-300 disabled:opacity-50 text-slate-800 font-black rounded-lg flex items-center justify-center text-sm transition-transform active:scale-95 shadow-sm"
+          title="Diminuir"
+        >
+          -
+        </button>
+        <span className="w-8 text-center font-black text-base md:text-lg text-slate-900">
+          {localItem.quantity}
+        </span>
+        <button
+          onClick={() => {
+            const newQty = localItem.quantity + 1;
+            setLocalItem({...localItem, quantity: newQty});
+            onItemChange(item.id, 'quantity', newQty);
+          }}
+          disabled={!isActive}
+          className="w-7 h-7 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-black rounded-lg flex items-center justify-center text-sm transition-transform active:scale-95 shadow-sm"
+          title="Aumentar"
+        >
+          +
+        </button>
       </div>
 
       {/* Estimated Quantity */}
