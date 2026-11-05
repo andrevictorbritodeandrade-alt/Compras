@@ -469,69 +469,56 @@ export const EnemShoppingList: React.FC = () => {
       {/* ========================================================= */}
       {/* STICKY REAL-TIME SUMMARY WIDGET (Appears as user scrolls) */}
       {/* ========================================================= */}
-      <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b-4 border-red-600 shadow-lg -mx-4 px-4 py-2 transition-all">
-        <div className="max-w-4xl mx-auto flex flex-col gap-1.5">
-          {/* Header Row: Title & Active Badge */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="bg-red-600 text-yellow-300 px-2 py-0.5 rounded font-black text-xs uppercase tracking-wider shadow-sm">
+      {/* ========================================================= */}
+      {/* STICKY REAL-TIME SUMMARY WIDGET (Compact for mobile)      */}
+      {/* ========================================================= */}
+      <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b-2 border-red-600 shadow-md -mx-4 px-3 py-2 transition-all">
+        <div className="max-w-4xl mx-auto space-y-1.5">
+          {/* Top Row: Title, Items count, and Frios Toggle */}
+          <div className="flex items-center justify-between gap-1 text-xs">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="bg-red-600 text-yellow-300 px-1.5 py-0.5 rounded font-black text-[10px] uppercase tracking-wider shrink-0">
                 ENEM
               </span>
-              <h2 className="text-xs md:text-sm font-black text-slate-900 uppercase tracking-tight">
-                COMPRAS DO ENEM • ASSAÍ PILARES
-              </h2>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-black text-slate-700 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-300">
-                {calculations.activeCount} de {calculations.totalCount} itens ativos
+              <span className="font-black text-slate-900 text-xs truncate">
+                ASSAÍ PILARES
               </span>
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="bg-red-600 hover:bg-red-700 text-white p-1 rounded-full shadow transition-transform active:scale-95 flex items-center justify-center"
-                title="Adicionar Item"
-              >
-                <Plus size={16} />
-              </button>
+              <span className="text-[10px] font-black text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded-full border border-slate-200 shrink-0">
+                {calculations.activeCount}/{calculations.totalCount} ativos
+              </span>
             </div>
+
+            {/* Sliced Option Switch */}
+            <button
+              onClick={() => {
+                const nextVal = !useSlicedOption;
+                setUseSlicedOption(nextVal);
+                localStorage.setItem('enem_use_sliced', String(nextVal));
+                const docRef = doc(db, 'specialLists', 'enem');
+                updateDoc(docRef, { useSlicedOption: nextVal }).catch(console.error);
+              }}
+              className={`text-[9px] font-black uppercase px-2 py-1 rounded-lg border transition-all shrink-0 ${
+                useSlicedOption
+                  ? 'bg-yellow-400 text-black border-yellow-500 shadow-xs'
+                  : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
+              }`}
+              title="Alternar entre frios na peça vs fatiados na bandeja"
+            >
+              {useSlicedOption ? '✓ Fatiados (+R$27)' : 'Peça (Padrão)'}
+            </button>
           </div>
 
-          {/* Subtotals & Grand Total Card */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 bg-gradient-to-r from-red-600 via-red-600 to-red-700 text-white px-3 py-2 rounded-xl shadow-md border-2 border-yellow-400">
-            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
-              <div className="flex items-center gap-1">
-                <span className="text-[10px] uppercase font-black tracking-wide text-yellow-200">Encarte:</span>
-                <span className="font-black text-white">{formatCurrency(calculations.encarteTotal)}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="text-[10px] uppercase font-black tracking-wide text-yellow-200">Prateleira:</span>
-                <span className="font-black text-white">{formatCurrency(calculations.foraTotal)}</span>
-              </div>
-              {/* Option to toggle sliced cold cuts */}
-              <button
-                onClick={() => {
-                  const nextVal = !useSlicedOption;
-                  setUseSlicedOption(nextVal);
-                  localStorage.setItem('enem_use_sliced', String(nextVal));
-                  const docRef = doc(db, 'specialLists', 'enem');
-                  updateDoc(docRef, { useSlicedOption: nextVal }).catch(console.error);
-                }}
-                className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full border transition-all ${
-                  useSlicedOption
-                    ? 'bg-yellow-400 text-black border-yellow-500 shadow-sm'
-                    : 'bg-white/20 text-yellow-200 border-white/30 hover:bg-white/30'
-                }`}
-                title="Alternar entre frios na peça vs fatiados na bandeja"
-              >
-                {useSlicedOption ? '✓ Frios Fatiados (+R$ 27)' : '+ Ver c/ Frios Fatiados'}
-              </button>
+          {/* Bottom Row: Subtotals & Big Yellow/Red Total */}
+          <div className="flex items-center justify-between gap-2 bg-red-600 text-white px-2.5 py-1.5 rounded-xl shadow-xs border border-yellow-400">
+            <div className="flex items-center gap-2 text-[10px] sm:text-xs text-yellow-100 font-bold">
+              <div>Encarte: <strong className="text-white font-black">{formatCurrency(calculations.encarteTotal)}</strong></div>
+              <span className="opacity-40">|</span>
+              <div>Prat.: <strong className="text-white font-black">{formatCurrency(calculations.foraTotal)}</strong></div>
             </div>
 
-            <div className="flex items-center justify-between sm:justify-end gap-2 border-t sm:border-t-0 pt-1 sm:pt-0 border-red-500/50">
-              <div className="flex items-center">
-                <Calculator size={18} className="mr-1 text-yellow-300 shrink-0" />
-                <span className="text-[11px] uppercase font-black tracking-wider text-yellow-200 mr-2">TOTAL:</span>
-              </div>
-              <span className="text-xl md:text-2xl font-black tracking-tighter text-yellow-300 drop-shadow-sm">
+            <div className="flex items-center gap-1 shrink-0">
+              <span className="text-[10px] uppercase font-black tracking-wider text-yellow-200">TOTAL:</span>
+              <span className="text-base sm:text-lg font-black tracking-tight text-yellow-300">
                 {formatCurrency(calculations.grandTotal)}
               </span>
             </div>
@@ -540,64 +527,60 @@ export const EnemShoppingList: React.FC = () => {
       </div>
 
       {/* Action Bar: Add Item button & Tips toggle */}
-      <div className="flex flex-wrap items-center justify-between gap-2 px-1">
+      <div className="flex items-center justify-between gap-2 px-1">
         <button
           onClick={() => setShowAddModal(true)}
-          className="bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase px-4 py-2.5 rounded-xl shadow-md flex items-center gap-1.5 transition-transform active:scale-95 border-2 border-yellow-400"
+          className="flex-1 bg-red-600 hover:bg-red-700 text-white font-black text-xs uppercase py-2 px-3 rounded-xl shadow-xs flex items-center justify-center gap-1.5 transition-transform active:scale-95 border border-yellow-400"
         >
-          <Plus size={16} className="text-yellow-300" />
-          <span>Adicionar Novo Item (+)</span>
+          <Plus size={15} className="text-yellow-300" />
+          <span>Adicionar Item</span>
         </button>
 
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsTipsOpen(!isTipsOpen)}
-            className="bg-yellow-400 hover:bg-yellow-300 text-black font-black text-xs uppercase px-3 py-2 rounded-xl shadow-sm flex items-center gap-1.5 transition-transform active:scale-95 border border-yellow-500"
-          >
-            <Info size={14} />
-            <span>3 Dicas Assaí Pilares</span>
-            {isTipsOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-          </button>
+        <button
+          onClick={() => setIsTipsOpen(!isTipsOpen)}
+          className="bg-yellow-400 hover:bg-yellow-300 text-black font-black text-xs uppercase py-2 px-3 rounded-xl shadow-xs flex items-center gap-1 transition-transform active:scale-95 border border-yellow-500 shrink-0"
+        >
+          <Info size={14} />
+          <span>3 Dicas Assaí</span>
+          {isTipsOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+        </button>
 
-          <button
-            onClick={handleResetToDefault}
-            className="bg-slate-100 hover:bg-slate-200 text-slate-700 font-black text-xs uppercase px-3 py-2 rounded-xl transition-colors flex items-center gap-1 border border-slate-300"
-            title="Restaurar itens padrão do encarte"
-          >
-            <RefreshCw size={13} />
-            <span className="hidden sm:inline">Restaurar</span>
-          </button>
-        </div>
+        <button
+          onClick={handleResetToDefault}
+          className="bg-slate-100 hover:bg-slate-200 text-slate-700 p-2 rounded-xl transition-colors border border-slate-300 shrink-0"
+          title="Restaurar itens padrão do encarte"
+        >
+          <RefreshCw size={14} />
+        </button>
       </div>
 
       {/* Tips Banner (Collapsible) */}
       {isTipsOpen && (
-        <div className="bg-yellow-50 border-4 border-yellow-400 rounded-xl p-4 shadow-sm text-xs text-slate-800 space-y-2 animate-in fade-in slide-in-from-top-2">
-          <div className="flex items-center gap-2 font-black text-slate-900 uppercase text-sm border-b border-yellow-300 pb-1">
-            <AlertTriangle size={18} className="text-red-600" />
-            <span>Atenção aos Detalhes do Encarte (Assaí Pilares - RJ)</span>
+        <div className="bg-yellow-50 border-2 border-yellow-400 rounded-xl p-3 shadow-xs text-xs text-slate-800 space-y-2 animate-in fade-in slide-in-from-top-2">
+          <div className="flex items-center gap-2 font-black text-slate-900 uppercase text-xs border-b border-yellow-300 pb-1">
+            <AlertTriangle size={15} className="text-red-600 shrink-0" />
+            <span>Dicas do Encarte Assaí Pilares (RJ)</span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
-            <div className="bg-white p-2.5 rounded-lg border border-yellow-300 shadow-2xs">
-              <p className="font-black text-red-600 uppercase mb-1">1. Peça vs Fatiado</p>
-              <p className="text-[11px] leading-relaxed text-slate-700">
-                Os preços de queijo (R$ 34,90/kg) e mortadela (R$ 13,90/kg) no encarte são na <strong>PEÇA / PEDAÇO</strong>.
-                Bandejas já fatiadas custam ~R$ 44,90/kg e ~R$ 19,90/kg (+R$ 27 total).
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 pt-1 text-[11px]">
+            <div className="bg-white p-2 rounded-lg border border-yellow-300 shadow-2xs">
+              <p className="font-black text-red-600 uppercase mb-0.5">1. Peça vs Fatiado</p>
+              <p className="leading-snug text-slate-700">
+                Queijo (R$ 34,90/kg) e mortadela (R$ 13,90/kg) são na <strong>PEÇA</strong>. Fatiados na bandeja custam ~R$ 44,90/kg e ~R$ 19,90/kg (+R$ 27 no total).
               </p>
             </div>
 
-            <div className="bg-white p-2.5 rounded-lg border border-yellow-300 shadow-2xs">
-              <p className="font-black text-red-600 uppercase mb-1">2. App "Meu Assaí"</p>
-              <p className="text-[11px] leading-relaxed text-slate-700">
-                Cadastre seu CPF no app antes de passar no caixa para garantir: Leite Quatá a R$ 4,39, Açúcar a R$ 2,99, Creme de Queijo a R$ 5,99 e Pão Panco a R$ 6,99.
+            <div className="bg-white p-2 rounded-lg border border-yellow-300 shadow-2xs">
+              <p className="font-black text-red-600 uppercase mb-0.5">2. App "Meu Assaí"</p>
+              <p className="leading-snug text-slate-700">
+                Digite o CPF no caixa para ativar: Leite Quatá R$ 4,39, Açúcar R$ 2,99, Creme de Queijo R$ 5,99 e Pão Panco R$ 6,99.
               </p>
             </div>
 
-            <div className="bg-white p-2.5 rounded-lg border border-yellow-300 shadow-2xs">
-              <p className="font-black text-red-600 uppercase mb-1">3. FeirAssaí & Frutas</p>
-              <p className="text-[11px] leading-relaxed text-slate-700">
-                Banana Prata (R$ 6,49/kg) e Maçã pequena (R$ 4,99 pct) foram escolhidas para o ENEM porque são práticas, fáceis de servir e não precisam ser descascadas na hora.
+            <div className="bg-white p-2 rounded-lg border border-yellow-300 shadow-2xs">
+              <p className="font-black text-red-600 uppercase mb-0.5">3. Frutas Práticas</p>
+              <p className="leading-snug text-slate-700">
+                Banana Prata (R$ 6,49/kg) e Maçã pequena (R$ 4,99 pct) não precisam ser descascadas/cortadas na hora do coffee break do ENEM.
               </p>
             </div>
           </div>
@@ -605,18 +588,9 @@ export const EnemShoppingList: React.FC = () => {
       )}
 
       {/* ========================================================= */}
-      {/* LIST OF CATEGORIES AND COMPACT ITEM ROWS                  */}
+      {/* LIST OF CATEGORIES AND ITEM CARDS (OPTIMIZED FOR MOBILE)  */}
       {/* ========================================================= */}
-      <div className="space-y-4">
-        {/* Mobile Column Headers */}
-        <div className="grid grid-cols-[26px_22px_1fr_auto_auto_auto] gap-1.5 sm:gap-2 px-1.5 sm:px-3 py-1.5 text-center text-[10px] sm:text-[11px] font-black text-slate-500 uppercase tracking-widest bg-slate-100 rounded-lg border-2 border-slate-200">
-          <div className="w-[26px] text-center">L/D</div>
-          <div className="w-[22px] text-center">OK</div>
-          <div className="text-left pl-1">Produto</div>
-          <div className="w-[96px] sm:w-[104px] text-center">Qtd</div>
-          <div className="w-14 sm:w-16 text-center">Preço</div>
-          <div className="w-[60px] text-right">Subtotal</div>
-        </div>
+      <div className="space-y-3">
 
         {categoriesList.map(([categoryName, catItems]) => {
           const isEncarte = categoryName.includes('Encarte');
@@ -866,29 +840,28 @@ const EnemItemRow: React.FC<EnemItemRowProps> = ({
 
   return (
     <div
-      className={`grid grid-cols-[26px_22px_1fr_auto_auto_auto] gap-1.5 sm:gap-2 px-1.5 sm:px-3 py-1.5 items-center transition-colors relative ${
+      className={`px-2.5 py-2 transition-colors relative border-b border-slate-100 last:border-b-0 ${
         !isActive ? 'opacity-40 grayscale bg-slate-50' : isChecked ? 'bg-yellow-50/60' : 'hover:bg-slate-50'
       }`}
     >
-      {/* 1. Toggle Active/Inactive (Ligar / Desligar) */}
-      <div className="w-[26px] flex justify-center">
+      {/* LINE 1: Power, Check, Full Product Name, Delete */}
+      <div className="flex items-center gap-2">
+        {/* Toggle Active/Inactive (Ligar / Desligar) */}
         <button
           onClick={onToggleActive}
-          className={`p-1 rounded-full transition-all ${
+          className={`p-1 rounded-full transition-all shrink-0 ${
             isActive ? 'bg-red-600 text-white shadow-xs' : 'bg-slate-300 text-slate-700'
           }`}
           title={isActive ? 'Desligar item' : 'Ligar item'}
         >
           <Power size={13} />
         </button>
-      </div>
 
-      {/* 2. Checkmark (Comprado / Carrinho) */}
-      <div className="w-[22px] flex justify-center">
+        {/* Checkmark (Comprado / Carrinho) */}
         <button
           onClick={onToggleChecked}
           disabled={!isActive}
-          className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${
+          className={`w-5 h-5 rounded border flex items-center justify-center transition-all shrink-0 ${
             isChecked
               ? 'bg-yellow-400 border-yellow-500 text-black font-black'
               : 'border-slate-300 bg-white hover:border-slate-400'
@@ -897,92 +870,103 @@ const EnemItemRow: React.FC<EnemItemRowProps> = ({
         >
           {isChecked && <Check size={12} strokeWidth={4} />}
         </button>
-      </div>
 
-      {/* 3. Product Name & Note (Compact layout) */}
-      <div className="min-w-0 pr-1">
-        <div
-          className={`font-black text-[11px] sm:text-xs text-slate-900 leading-tight truncate uppercase ${
-            isChecked ? 'line-through text-slate-400' : ''
-          }`}
-          title={item.name}
-        >
-          {item.name}
-        </div>
-        {item.note && (
-          <div className="text-[9px] text-slate-500 truncate" title={item.note}>
-            {item.note}
+        {/* Full Product Name - 100% visible, NEVER truncated to 1 letter */}
+        <div className="flex-1 min-w-0 pr-1">
+          <div
+            className={`font-black text-xs sm:text-sm text-slate-900 leading-snug uppercase ${
+              isChecked ? 'line-through text-slate-400' : ''
+            }`}
+          >
+            {item.name}
           </div>
-        )}
-        {item.appDiscount && (
-          <span className="inline-block bg-yellow-400 text-black text-[8px] font-black uppercase px-1 rounded mt-0.5">
-            App Meu Assaí
-          </span>
-        )}
-      </div>
-
-      {/* 4. Quantity Stepper (- / +) - AUMENTADO E SEM TRUNCAMENTO */}
-      <div className="w-[96px] sm:w-[104px] flex items-center justify-center gap-1">
-        <button
-          onClick={() => onQuantityStep(-1)}
-          disabled={!isActive}
-          className="w-6 h-6 bg-slate-200 hover:bg-slate-300 disabled:opacity-50 text-slate-800 font-black rounded flex items-center justify-center text-xs transition-transform active:scale-95 shrink-0"
-          title="Diminuir"
-        >
-          -
-        </button>
-        <div className="flex-1 text-center font-black text-xs sm:text-sm text-slate-900 leading-none whitespace-nowrap">
-          <span>{item.quantity}</span>
-          <span className="text-[9px] sm:text-[10px] font-bold text-slate-500 ml-0.5 uppercase">{item.unit}</span>
         </div>
-        <button
-          onClick={() => onQuantityStep(1)}
-          disabled={!isActive}
-          className="w-6 h-6 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-black rounded flex items-center justify-center text-xs transition-transform active:scale-95 shrink-0"
-          title="Aumentar"
-        >
-          +
-        </button>
-      </div>
 
-      {/* 5. Unit Price Input - COMPACTO E SEM OCUPAR MUITO ESPAÇO */}
-      <div className="w-14 sm:w-16 flex justify-center">
-        <input
-          type="text"
-          inputMode="decimal"
-          value={localPriceStr}
-          disabled={!isActive || (useSlicedOption && (item.id === 102 || item.id === 103))}
-          onChange={(e) => {
-            const raw = e.target.value.replace('.', ',');
-            if (/^\d*,?\d*$/.test(raw)) {
-              let clean = raw;
-              if (clean.length > 1 && clean.startsWith('0') && !clean.startsWith('0,')) {
-                clean = clean.replace(/^0+/, '');
-                if (clean === '' || clean.startsWith(',')) clean = '0' + clean;
-              }
-              setLocalPriceStr(clean);
-              onPriceChange(clean);
-            }
-          }}
-          onBlur={() => {
-            onPriceChange(localPriceStr);
-          }}
-          className="w-full rounded border border-slate-300 px-1 py-0.5 text-[11px] sm:text-xs font-black focus:border-red-500 focus:ring-1 focus:ring-red-500 text-right text-slate-900 bg-white"
-        />
-      </div>
-
-      {/* 6. Subtotal & Delete */}
-      <div className="w-[60px] flex items-center justify-end gap-1">
-        <span className="font-black text-slate-900 text-[11px] sm:text-xs whitespace-nowrap text-right">
-          {formatCurrency(subtotal)}
-        </span>
+        {/* Delete */}
         <button
           onClick={onDelete}
-          className="text-slate-300 hover:text-red-600 transition-colors p-0.5 rounded shrink-0"
+          className="text-slate-300 hover:text-red-600 transition-colors p-1 rounded shrink-0"
           title="Excluir item"
         >
-          <Trash2 size={12} />
+          <Trash2 size={14} />
         </button>
+      </div>
+
+      {/* Note and App Meu Assaí tag */}
+      {(item.note || item.appDiscount) && (
+        <div className="pl-8 pr-6 pt-0.5 pb-0.5 flex flex-wrap items-center gap-1.5 text-[10px] text-slate-500">
+          {item.appDiscount && (
+            <span className="bg-yellow-400 text-black font-black uppercase text-[8px] px-1 rounded shrink-0">
+              App Meu Assaí
+            </span>
+          )}
+          {item.note && <span className="leading-tight">{item.note}</span>}
+        </div>
+      )}
+
+      {/* LINE 2: Controls (QTD Stepper, Preço Unit, Subtotal) - Clean, Spacious, Highly Usable on mobile */}
+      <div className="flex items-center justify-between gap-2 pt-1.5 pl-8 pr-1 mt-0.5">
+        {/* Quantity Stepper */}
+        <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-0.5 border border-slate-200 shrink-0">
+          <button
+            onClick={() => onQuantityStep(-1)}
+            disabled={!isActive}
+            className="w-7 h-7 bg-white hover:bg-slate-200 disabled:opacity-40 text-slate-800 font-black rounded-md flex items-center justify-center text-sm shadow-xs transition-transform active:scale-95"
+            title="Diminuir"
+          >
+            -
+          </button>
+          <div className="px-2 text-center font-black text-xs sm:text-sm text-slate-900 leading-none whitespace-nowrap">
+            <span>{item.quantity}</span>
+            <span className="text-[10px] font-bold text-slate-500 ml-0.5 uppercase">{item.unit}</span>
+          </div>
+          <button
+            onClick={() => onQuantityStep(1)}
+            disabled={!isActive}
+            className="w-7 h-7 bg-red-600 hover:bg-red-700 disabled:opacity-40 text-white font-black rounded-md flex items-center justify-center text-sm shadow-xs transition-transform active:scale-95"
+            title="Aumentar"
+          >
+            +
+          </button>
+        </div>
+
+        {/* Unit Price */}
+        <div className="flex items-center gap-1 shrink-0">
+          <span className="text-[10px] font-black uppercase text-slate-400">UN:</span>
+          <div className="flex items-center bg-white border border-slate-300 rounded-lg px-1.5 py-0.5 focus-within:ring-1 focus-within:ring-red-500">
+            <span className="text-[10px] font-bold text-slate-500 mr-0.5">R$</span>
+            <input
+              type="text"
+              inputMode="decimal"
+              value={localPriceStr}
+              disabled={!isActive || (useSlicedOption && (item.id === 102 || item.id === 103))}
+              onChange={(e) => {
+                const raw = e.target.value.replace('.', ',');
+                if (/^\d*,?\d*$/.test(raw)) {
+                  let clean = raw;
+                  if (clean.length > 1 && clean.startsWith('0') && !clean.startsWith('0,')) {
+                    clean = clean.replace(/^0+/, '');
+                    if (clean === '' || clean.startsWith(',')) clean = '0' + clean;
+                  }
+                  setLocalPriceStr(clean);
+                  onPriceChange(clean);
+                }
+              }}
+              onBlur={() => {
+                onPriceChange(localPriceStr);
+              }}
+              className="w-12 text-right font-black text-xs text-slate-900 outline-none bg-transparent"
+            />
+          </div>
+        </div>
+
+        {/* Subtotal */}
+        <div className="text-right shrink-0">
+          <div className="text-[8px] font-black uppercase tracking-wider text-slate-400">Subtotal</div>
+          <div className="font-black text-xs sm:text-sm text-slate-900 whitespace-nowrap">
+            {formatCurrency(subtotal)}
+          </div>
+        </div>
       </div>
     </div>
   );
