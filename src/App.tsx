@@ -13,9 +13,10 @@ import { doc, onSnapshot, setDoc, updateDoc, collection, getDocs, writeBatch, ar
 import { Logo } from './components/Logo';
 import { GoogleGenAI } from '@google/genai';
 import { AIAssistant } from './components/AIAssistant';
-import { ShoppingCart, Tag, ListTodo, History } from 'lucide-react';
+import { ShoppingCart, Tag, ListTodo, History, GraduationCap } from 'lucide-react';
 import { INITIAL_DEALS } from './data/initialDeals';
 import { GoogleDriveSync } from './components/GoogleDriveSync';
+import { EnemShoppingList } from './components/EnemShoppingList';
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
@@ -51,7 +52,13 @@ const App: React.FC = () => {
   const [history, setHistory] = useState<MonthlyHistoryType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isAddItemFormVisible, setIsAddItemFormVisible] = useState(false);
-  const [activeTab, setActiveTab] = useState<'list' | 'pre-list' | 'encartes' | 'history'>('list');
+  const [activeTab, setActiveTab] = useState<'list' | 'pre-list' | 'encartes' | 'history' | 'enem'>(() => {
+    return (localStorage.getItem('activeTab') as any) || 'enem';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('activeTab', activeTab);
+  }, [activeTab]);
 
   const [isAIAssistantOpen, setIsAIAssistantOpen] = useState(false);
   const [estimations, setEstimations] = useState<Map<string, { quantity: number; unit: string }>>(new Map());
@@ -689,59 +696,70 @@ const App: React.FC = () => {
           <div className="container mx-auto px-4 mt-4 mb-2 flex justify-center">
             <button
               onClick={handleFinalizePurchase}
-              className="bg-green-600 text-white font-black uppercase px-8 py-4 rounded-full shadow-lg hover:bg-green-700 transition-transform active:scale-95 flex items-center gap-2 text-lg border-4 border-green-700"
+              className="bg-red-600 hover:bg-red-700 text-yellow-300 font-black uppercase px-8 py-3.5 rounded-full shadow-lg transition-transform active:scale-95 flex items-center gap-2 text-base md:text-lg border-4 border-yellow-400"
             >
-              <ShoppingCart size={24} />
+              <ShoppingCart size={22} className="text-yellow-300" />
               Finalizar Compra de Hoje
             </button>
           </div>
         </>
       )}
       
-      <div className="container mx-auto px-4 mb-6">
-        <div className="flex justify-start md:justify-center overflow-x-auto no-scrollbar gap-2 md:gap-4 py-2">
+      <div className="container mx-auto px-4 mb-4">
+        <div className="flex justify-start md:justify-center overflow-x-auto no-scrollbar gap-2 md:gap-3 py-2">
             <button
-                onClick={() => setActiveTab('list')}
-                className={`flex items-center px-4 md:px-6 py-3 rounded-full font-bold text-base md:text-lg transition-all whitespace-nowrap ${
-                    activeTab === 'list' 
-                    ? 'bg-white text-violet-700 shadow-md' 
-                    : 'bg-white/30 text-slate-700 hover:bg-white/50'
+                onClick={() => setActiveTab('enem')}
+                className={`flex items-center px-4 md:px-5 py-2.5 rounded-full font-black text-xs md:text-sm transition-all whitespace-nowrap ${
+                    activeTab === 'enem' 
+                    ? 'bg-red-600 text-yellow-300 shadow-md border-2 border-yellow-400' 
+                    : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border-2 border-slate-200'
                 }`}
             >
-                <ShoppingCart className="w-5 h-5 mr-2" />
+                <GraduationCap className="w-4 h-4 mr-1.5 text-yellow-400" />
+                Compras do ENEM
+            </button>
+            <button
+                onClick={() => setActiveTab('list')}
+                className={`flex items-center px-4 md:px-5 py-2.5 rounded-full font-black text-xs md:text-sm transition-all whitespace-nowrap ${
+                    activeTab === 'list' 
+                    ? 'bg-red-600 text-yellow-300 shadow-md border-2 border-yellow-400' 
+                    : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border-2 border-slate-200'
+                }`}
+            >
+                <ShoppingCart className="w-4 h-4 mr-1.5" />
                 Lista de Compras
             </button>
             <button
                 onClick={() => setActiveTab('pre-list')}
-                className={`flex items-center px-4 md:px-6 py-3 rounded-full font-bold text-base md:text-lg transition-all whitespace-nowrap ${
+                className={`flex items-center px-4 md:px-5 py-2.5 rounded-full font-black text-xs md:text-sm transition-all whitespace-nowrap ${
                     activeTab === 'pre-list' 
-                    ? 'bg-white text-violet-700 shadow-md' 
-                    : 'bg-white/30 text-slate-700 hover:bg-white/50'
+                    ? 'bg-red-600 text-yellow-300 shadow-md border-2 border-yellow-400' 
+                    : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border-2 border-slate-200'
                 }`}
             >
-                <ListTodo className="w-5 h-5 mr-2" />
-                Antes de Sair / Faltando em casa
+                <ListTodo className="w-4 h-4 mr-1.5" />
+                Antes de Sair / Faltando
             </button>
             <button
                 onClick={() => setActiveTab('encartes')}
-                className={`flex items-center px-4 md:px-6 py-3 rounded-full font-bold text-base md:text-lg transition-all whitespace-nowrap ${
+                className={`flex items-center px-4 md:px-5 py-2.5 rounded-full font-black text-xs md:text-sm transition-all whitespace-nowrap ${
                     activeTab === 'encartes' 
-                    ? 'bg-white text-violet-700 shadow-md' 
-                    : 'bg-white/30 text-slate-700 hover:bg-white/50'
+                    ? 'bg-red-600 text-yellow-300 shadow-md border-2 border-yellow-400' 
+                    : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border-2 border-slate-200'
                 }`}
             >
-                <Tag className="w-5 h-5 mr-2" />
+                <Tag className="w-4 h-4 mr-1.5" />
                 Encartes
             </button>
             <button
                 onClick={() => setActiveTab('history')}
-                className={`flex items-center px-4 md:px-6 py-3 rounded-full font-bold text-base md:text-lg transition-all whitespace-nowrap ${
+                className={`flex items-center px-4 md:px-5 py-2.5 rounded-full font-black text-xs md:text-sm transition-all whitespace-nowrap ${
                     activeTab === 'history' 
-                    ? 'bg-white text-violet-700 shadow-md' 
-                    : 'bg-white/30 text-slate-700 hover:bg-white/50'
+                    ? 'bg-red-600 text-yellow-300 shadow-md border-2 border-yellow-400' 
+                    : 'bg-slate-100 text-slate-800 hover:bg-slate-200 border-2 border-slate-200'
                 }`}
             >
-                <History className="w-5 h-5 mr-2" />
+                <History className="w-4 h-4 mr-1.5" />
                 Histórico
             </button>
         </div>
@@ -805,6 +823,9 @@ const App: React.FC = () => {
                         existingItemNames={allItemNames}
                         shoppingList={currentShoppingList}
                     />
+                )}
+                {activeTab === 'enem' && (
+                    <EnemShoppingList />
                 )}
                 {activeTab === 'history' && (
                     <MonthlyHistory history={history} purchases={purchases} />

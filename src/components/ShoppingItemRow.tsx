@@ -23,12 +23,14 @@ export const ShoppingItemRow: React.FC<ShoppingItemRowProps> = ({
 }) => {
   const [localItem, setLocalItem] = useState(item);
   const [localCategory, setLocalCategory] = useState(categories.find(c => c.items.some(i => i.id === item.id))?.name || '');
+  const [localPriceStr, setLocalPriceStr] = useState(item.price.toString().replace('.', ','));
   const rowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const isFocusedInside = rowRef.current && rowRef.current.contains(document.activeElement);
     if (!isFocusedInside) {
       setLocalItem(item);
+      setLocalPriceStr(item.price.toString().replace('.', ','));
       setLocalCategory(categories.find(c => c.items.some(i => i.id === item.id))?.name || '');
     }
   }, [item, categories]);
@@ -84,7 +86,7 @@ export const ShoppingItemRow: React.FC<ShoppingItemRowProps> = ({
       </div>
 
       {/* Current Quantity Stepper (compacted) */}
-      <div className="col-span-2 flex items-center justify-center gap-0.5">
+      <div className="col-span-2 flex items-center justify-center gap-1">
         <button
           onClick={() => {
             const newQty = Math.max(0, localItem.quantity - 1);
@@ -92,12 +94,12 @@ export const ShoppingItemRow: React.FC<ShoppingItemRowProps> = ({
             onItemChange(item.id, 'quantity', newQty);
           }}
           disabled={!isActive}
-          className="w-6 h-6 bg-slate-200 hover:bg-slate-300 disabled:opacity-50 text-slate-800 font-black rounded flex items-center justify-center text-xs transition-transform active:scale-95"
+          className="w-6 h-6 bg-slate-200 hover:bg-slate-300 disabled:opacity-50 text-slate-800 font-black rounded flex items-center justify-center text-xs transition-transform active:scale-95 shrink-0"
           title="Diminuir"
         >
           -
         </button>
-        <span className="w-5 text-center font-black text-xs text-slate-900">
+        <span className="min-w-[28px] text-center font-black text-xs sm:text-sm text-slate-900 leading-none">
           {localItem.quantity}
         </span>
         <button
@@ -107,7 +109,7 @@ export const ShoppingItemRow: React.FC<ShoppingItemRowProps> = ({
             onItemChange(item.id, 'quantity', newQty);
           }}
           disabled={!isActive}
-          className="w-6 h-6 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-black rounded flex items-center justify-center text-xs transition-transform active:scale-95"
+          className="w-6 h-6 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-black rounded flex items-center justify-center text-xs transition-transform active:scale-95 shrink-0"
           title="Aumentar"
         >
           +
@@ -115,24 +117,23 @@ export const ShoppingItemRow: React.FC<ShoppingItemRowProps> = ({
       </div>
 
       {/* Unit Price (compacted) */}
-      <div className="col-span-3">
+      <div className="col-span-3 flex justify-center">
         <input
           type="text"
           inputMode="decimal"
           data-type="price"
-          value={localItem.price.toString().replace('.', ',')}
+          value={localPriceStr}
           onChange={(e) => {
             const val = e.target.value.replace('.', ',');
-            // Only allow digits and one comma
             if (/^\d*,?\d*$/.test(val)) {
-                // If it starts with 0 and is more than one digit (and not just "0,"), remove the leading 0
                 const sanitized = val.length > 1 && val.startsWith('0') && !val.startsWith('0,') ? val.substring(1) : val;
+                setLocalPriceStr(sanitized);
                 setLocalItem({...localItem, price: parseFloat(sanitized.replace(',', '.') || '0')});
             }
           }}
           onBlur={() => handleBlur('price', localItem.price)}
           onKeyDown={handleKeyDown}
-          className={`block w-full rounded border border-slate-300 px-1 py-1 text-xs font-black focus:border-red-500 focus:ring-red-500 text-right ${bestDeal && localItem.price > bestDeal.price ? 'text-red-600' : 'text-slate-900'}`}
+          className={`block w-full max-w-[80px] rounded border border-slate-300 px-1 py-0.5 text-xs font-black focus:border-red-500 focus:ring-1 focus:ring-red-500 text-right ${bestDeal && localItem.price > bestDeal.price ? 'text-red-600' : 'text-slate-900'} bg-white`}
           disabled={!isActive}
         />
       </div>

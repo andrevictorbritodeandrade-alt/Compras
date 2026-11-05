@@ -40,10 +40,10 @@ export const SummaryBar: React.FC<SummaryBarProps> = ({
           </div>
 
           {/* Total Card (Full Width) */}
-          <div className="flex items-center justify-between bg-emerald-600 text-white px-3 py-1 rounded-lg shadow-sm w-full">
+          <div className="flex items-center justify-between bg-red-600 text-white px-3 py-1 rounded-lg shadow-sm w-full border border-yellow-400">
             <div className="flex items-center">
                 <Calculator size={18} className="mr-2 text-yellow-300 shrink-0" />
-                <span className="text-[10px] uppercase font-black tracking-wider text-emerald-100">Total</span>
+                <span className="text-[10px] uppercase font-black tracking-wider text-yellow-200">Total</span>
             </div>
             <span className="text-lg font-black tracking-tighter text-yellow-300">{formatCurrency(total)}</span>
           </div>
