@@ -27,10 +27,10 @@ export const MonthTabs: React.FC<MonthTabsProps> = ({ activeMonth, onMonthChange
       <button
         key={month}
         onClick={() => onMonthChange(month)}
-        className={`flex-1 min-w-[60px] whitespace-nowrap py-2 px-2 rounded-lg font-black text-sm md:text-base transition-transform active:scale-95 uppercase tracking-wider
+        className={`w-full py-1.5 px-0.5 rounded-lg font-black text-xs sm:text-sm transition-transform active:scale-95 uppercase tracking-tight flex items-center justify-center
           ${isActive
             ? 'bg-yellow-400 text-black shadow-md border-2 border-yellow-500'
-            : 'bg-red-600 text-white hover:bg-red-500 border-2 border-transparent'
+            : 'bg-red-600 text-white hover:bg-red-500 border border-red-500'
           }`}
       >
         {PT_BR_MONTHS_ABBR[month]}
@@ -39,12 +39,12 @@ export const MonthTabs: React.FC<MonthTabsProps> = ({ activeMonth, onMonthChange
   };
 
   return (
-    <div className="bg-red-700 border-b-4 border-red-800">
-      <nav className="container mx-auto px-2 py-2 flex flex-col gap-2" aria-label="Tabs">
-        <div className="flex justify-between gap-1">
+    <div className="bg-red-700 border-b-2 border-red-800">
+      <nav className="container mx-auto px-2 py-1.5 flex flex-col gap-1" aria-label="Tabs">
+        <div className="grid grid-cols-6 gap-1 w-full">
           {firstHalf.map(renderMonth)}
         </div>
-        <div className="flex justify-between gap-1">
+        <div className="grid grid-cols-6 gap-1 w-full">
           {secondHalf.map(renderMonth)}
         </div>
       </nav>
